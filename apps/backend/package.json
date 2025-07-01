@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "generate-kysely-types": "ts-node src/generate-kysely-types.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +21,10 @@
     "dotenv": "^17.0.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "kysely": "^0.28.2",
+    "kysely-codegen": "^0.18.5",
     "prisma": "^6.10.1",
+    "prisma-extension-kysely": "^3.0.0",
     "stripe": "^18.2.1",
     "zod": "^3.25.67"
   },
@@ -31,6 +35,7 @@
     "eslint": "^9.30.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
+    "prisma-kysely": "^1.8.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
