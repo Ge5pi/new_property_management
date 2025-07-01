@@ -1,0 +1,167 @@
+.select-selected-wrapper {
+  border: none !important;
+  z-index: auto !important;
+}
+
+.select-selected:not(.rbt-input-multi .rbt-input-wrapper input):disabled,
+.rbt-input-multi.disabled {
+  background-color: #f9f8fc !important;
+}
+
+.select-selected {
+  min-height: 40px;
+  text-align: start !important;
+  color: #444 !important;
+}
+
+.select-selected:not(:hover):not(:focus):not(.is-valid):not(.is-invalid):not(.tiptap-select) {
+  border: 1px solid #cbc8d0 !important;
+}
+
+.rbt-input-multi .select-selected:not(:hover):not(:focus):not(.is-valid):not(.is-invalid) {
+  border: none !important;
+}
+
+.btn.select-selected.is-invalid:hover {
+  border-color: #fc3939 !important;
+}
+
+.btn.select-selected.is-valid:hover {
+  border-color: #189915 !important;
+}
+
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.disabled) {
+  color: inherit;
+}
+
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.input-group) {
+  padding: 8px 16px;
+  border: none;
+  box-shadow: none !important;
+  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+  cursor: default;
+  user-select: none;
+}
+
+/*style items (options):*/
+.select-selected-wrapper {
+  border: 1px solid rgba(0, 0, 0, 0.175) !important;
+  width: 100%;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.input-group):hover,
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.input-group):has(.active),
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.input-group).active {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  color: #111;
+}
+
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.input-group):active,
+.select-selected-wrapper .dropdown-menu > .dropdown-item:not(.input-group):focus {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: #111;
+}
+
+.select-selected-wrapper::after {
+  content: none !important;
+}
+
+.rbt-token {
+  background-color: #111111;
+  border: 1px solid #111111;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0.25rem;
+  margin-left: 0 !important;
+  padding-left: 13px;
+  padding-right: 5px;
+  border-radius: 20px;
+
+  min-height: 34px !important;
+  color: #ffffff !important;
+  font-size: 0.875em !important;
+}
+
+.rbt-token:has(button) {
+  padding-left: 13px;
+  padding-right: 5px;
+}
+
+.rbt-token:not(:has(button)) {
+  padding-left: 13px;
+  padding-right: 13px;
+}
+
+.rbt-token-label {
+  font-size: 0.875em !important;
+}
+
+.rbt-token .close {
+  height: 20px;
+  width: 20px;
+  background-color: rgb(48, 48, 48);
+  background-image: none !important;
+  padding: 0 !important;
+  color: #fff;
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0.5em;
+  font-size: 0.875em;
+  cursor: pointer;
+}
+
+.rbt-token .close:hover,
+.rbt-token .close:focus,
+.rbt-token .close:active {
+  color: #fff !important;
+}
+
+.rbt-input-wrapper {
+  display: flex;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.rbt-input-multi {
+  padding-right: 0 !important;
+}
+
+.rbt-input-multi .rbt-input-wrapper input {
+  min-width: 70px;
+}
+
+.rbt-menu {
+  z-index: 1250 !important;
+}
+
+.filter-input-loading {
+  background-color: #ffffff;
+  background-image: url('https://i.gifer.com/7plQ.gif') !important;
+  background-size: 60px !important;
+  background-position:
+    right -0.75rem center,
+    center right 2.25rem !important;
+  background-repeat: no-repeat;
+}
+
+.rbtk-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rbtk-select {
+    transition: none;
+  }
+}

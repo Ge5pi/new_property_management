@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/index.ts",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.12.4",
   "dependencies": {
+    "@new-property-management/shared": "workspace:*",
     "@prisma/client": "^6.10.1",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.56.0",
@@ -18,6 +21,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.10.1",
+    "stripe": "^18.2.1",
     "zod": "^3.25.67"
   },
   "devDependencies": {

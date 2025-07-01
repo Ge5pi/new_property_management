@@ -1,0 +1,51 @@
+.time-picker {
+  position: relative;
+  z-index: 3;
+}
+
+.time_picker_focus {
+  text-transform: uppercase !important;
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
+}
+
+.time_picker_focus:focus-within {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+  color: #444;
+  background-color: #fff;
+  border-color: #111111;
+  outline: 0;
+}
+
+.time-picker .rbt-menu {
+  min-width: fit-content !important;
+  border: 1px solid rgba(0, 0, 0, 0.175) !important;
+  z-index: 1025 !important;
+  width: 100%;
+  max-height: 200px !important;
+  font-size: small;
+  overflow: auto;
+  cursor: pointer;
+}
+
+.time-picker .rbt-menu > .dropdown-item {
+  text-align: center !important;
+  padding: 1px 5px 1px 5px !important;
+}
+
+.time-picker .rbt-menu > .dropdown-item:not(.input-group):hover,
+.time-picker .rbt-menu > .dropdown-item:not(.input-group):has(.active),
+.time-picker .rbt-menu > .dropdown-item:not(.input-group).active {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #111;
+}
+
+.time-picker .rbt-menu > .dropdown-item:not(.input-group):active,
+.time-picker .rbt-menu > .dropdown-item:not(.input-group):focus {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #111;
+}
+
+.time-picker .rbt-input-hint {
+  display: none !important;
+}

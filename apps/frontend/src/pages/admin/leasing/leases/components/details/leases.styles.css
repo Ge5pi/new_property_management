@@ -1,0 +1,117 @@
+.print-visible {
+  display: none;
+}
+
+.print-hidden {
+  display: block;
+}
+
+@media all {
+  .page-break {
+    display: none;
+  }
+}
+
+@media print {
+  .print-body {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-visible {
+    display: block !important;
+  }
+}
+
+@media print {
+  html,
+  body {
+    overflow: visible;
+    height: fit-content;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    zoom: 97% !important;
+  }
+
+  .page-section {
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .no-spacing-print {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+@media print {
+  .page-break {
+    display: block !important;
+    margin-top: 1rem !important;
+    page-break-inside: avoid !important;
+  }
+
+  .page-break.auto {
+    page-break-before: auto !important;
+  }
+
+  .page-break.always {
+    page-break-before: always !important;
+  }
+
+  .print-wrapper span {
+    background-color: white !important;
+  }
+
+  .print-wrapper h6,
+  .print-wrapper .h6,
+  .print-wrapper .h5,
+  .print-wrapper h5 {
+    font-size: 14px !important;
+  }
+
+  .print-wrapper,
+  .print-wrapper .card-subtitle {
+    font-size: 12px !important;
+  }
+
+  .print-wrapper .row .col-md-3 {
+    flex: 0 0 auto;
+    width: 25% !important;
+  }
+
+  .print-wrapper .row .col-md-4 {
+    flex: 0 0 auto;
+    width: 33.33333333% !important;
+  }
+
+  .print-wrapper .row .col-sm-8,
+  .print-wrapper .row .col-md-6 {
+    flex: 0 0 auto;
+    width: 50% !important;
+  }
+
+  .print-wrapper .my-4 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+@page {
+  size: 'A4';
+  margin-top: 12mm !important;
+  margin-bottom: 12mm !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}

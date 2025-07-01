@@ -1,0 +1,26 @@
+.filter-menu-container {
+  background: #ffffff !important;
+  border: 1px solid #000000 !important;
+  box-shadow: 0px 4px 25px rgba(0, 0, 0, 0.05) !important;
+  padding: 27px 20px !important;
+  z-index: 1220 !important;
+  min-width: 600px !important;
+}
+
+@media screen and (max-width: 768px) {
+  .filter-menu-container {
+    min-width: 450px !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .filter-menu-container {
+    min-width: 400px !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .filter-menu-container {
+    min-width: 300px !important;
+  }
+}

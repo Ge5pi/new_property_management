@@ -1,0 +1,29 @@
+.sub-navbar-dropdown {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+}
+
+.sub-navbar-dropdown .btn {
+  height: 40px !important;
+}
+
+.sub-navbar-dropdown .sub-navbar-dropdown-menu {
+  padding: 0 !important;
+}
+
+.sub-navbar-dropdown .sub-navbar-dropdown-menu .sub-navbar-dropdown-menu-item {
+  cursor: default !important;
+}
+
+.sub-navbar-dropdown.show .sub-navbar-dropdown-toggle {
+  background-color: #eeeeee !important;
+  border: 1px solid #cecece !important;
+  color: #111111 !important;
+}
+
+.sub-navbar-dropdown .sub-navbar-dropdown-title {
+  background-color: #eeeeee !important;
+  font-family: 'Satoshi-Bold';
+  color: #111111 !important;
+}

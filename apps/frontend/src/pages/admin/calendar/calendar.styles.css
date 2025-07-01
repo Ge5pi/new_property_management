@@ -1,0 +1,107 @@
+.rbc-event,
+.rbc-event.rbc-selected,
+.rbc-day-slot .rbc-selected.rbc-background-event {
+  background-color: #33d473;
+  border-radius: 0;
+
+  font-size: 12px !important;
+  color: #03180c;
+  outline: none !important;
+}
+
+.filtering .rbc-time-view,
+.filtering .rbc-month-view {
+  opacity: 0.5;
+}
+
+.rbc-header {
+  font-family: 'Satoshi-Bold' !important;
+  font-weight: bold !important;
+  font-size: 16px;
+}
+
+.rbc-header:not(:has(.rbc-button-link)) {
+  padding: 5px !important;
+}
+
+@media (min-width: 600px) {
+  .rbc-header:not(:has(.rbc-button-link)) {
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .rbc-header {
+    font-size: 14px !important;
+  }
+}
+
+.rbc-time-header-cell-single-day {
+  display: flex !important;
+  justify-content: start !important;
+}
+
+.rbc-time-header-cell-single-day .rbc-today {
+  background-color: #fbfbfb !important;
+  text-align: start !important;
+  min-height: 65px !important;
+}
+
+.rbc-time-header-cell-single-day .rbc-today .rbc-button-link {
+  width: 100% !important;
+  height: 100% !important;
+  text-align: end !important;
+  padding: 0 1rem !important;
+}
+
+.rbc-overflowing {
+  margin-right: 0 !important;
+}
+
+.rbc-button-link {
+  text-align: center;
+  font-size: 12px !important;
+}
+
+.rbc-date-cell {
+  padding: 5px !important;
+  text-align: start !important;
+  font-family: 'Satoshi-Medium' !important;
+  font-weight: 500 !important;
+}
+
+.rbc-time-slot {
+  font-family: 'Satoshi-Regular' !important;
+  font-weight: 300 !important;
+  font-size: small !important;
+  text-align: center !important;
+}
+
+.rbc-time-view .rbc-allday-cell {
+  display: none !important;
+}
+
+.summary-details {
+  position: fixed;
+  top: 0 !important;
+  height: 100% !important;
+  overflow: auto;
+  transition: 0.5s;
+  right: -200%;
+  z-index: 1028;
+}
+
+.summary-details.show {
+  right: 0 !important;
+}
+
+.summary-detail-bg {
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+}

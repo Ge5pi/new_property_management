@@ -1,0 +1,47 @@
+.min-max-slider .slider-wrapper input[type='range'] {
+  --minRangePercent: 0%;
+  --maxRangePercent: 0%;
+  height: 0.3rem !important;
+}
+
+.min-max-slider {
+  position: relative;
+  text-align: center;
+}
+
+.min-max-slider .slider-wrapper > label {
+  display: none;
+}
+
+.min-max-slider .slider-wrapper > input {
+  cursor: pointer;
+  position: absolute;
+}
+
+.min-max-slider .slider-wrapper > input.min:not(:disabled) {
+  background-image: linear-gradient(
+    to right,
+    #ededed 0%,
+    #ededed var(--minRangePercent),
+    #111 var(--minRangePercent),
+    #111 100%
+  ) !important;
+}
+
+.min-max-slider .slider-wrapper > input.max:not(:disabled) {
+  background-image: linear-gradient(
+    to right,
+    #111 0%,
+    #111 var(--maxRangePercent),
+    #ededed var(--maxRangePercent),
+    #ededed 100%
+  ) !important;
+}
+
+.min-max-slider .slider-wrapper input[type='range']:not(:disabled)::-webkit-slider-runnable-track {
+  background: none !important;
+}
+
+.min-max-slider .slider-wrapper .form-range::-webkit-slider-thumb {
+  position: relative !important;
+}

@@ -1,0 +1,62 @@
+.custom-table {
+  width: 100%;
+}
+
+.custom-table thead {
+  display: block;
+  background-color: #111111;
+  padding: 4px 0;
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.custom-table :is(thead, tbody) tr {
+  display: flex;
+  width: 100%;
+}
+
+.custom-table :is(thead th, tbody td) {
+  text-align: center;
+  font-weight: 500;
+  width: 20%;
+  font-size: 16px;
+}
+
+.custom-table :is(thead, tbody) tr td {
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.custom-table tbody td {
+  padding: 16px 24px;
+}
+
+.custom-table thead th {
+  padding: 4px 24px;
+}
+
+.custom-table :is(thead th:first-child, tbody td:first-child) {
+  text-align: left;
+}
+
+.custom-table tbody {
+  display: block;
+  overflow-y: auto;
+}
+
+.children-row {
+  background-color: #f5f5f5;
+}
+
+.children-row td:first-child {
+  padding-left: 48px;
+}
+
+.custom-toggle-button span svg {
+  transition: transform 0.5s ease;
+  transform: rotate(180deg);
+}
+
+.custom-toggle-button .active svg {
+  transform: rotate(360deg);
+}

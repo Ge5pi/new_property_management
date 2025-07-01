@@ -1,0 +1,121 @@
+import { Button, Card, Col, Form, Row } from 'react-bootstrap';
+
+import { Field, Formik } from 'formik';
+
+import { BackButton } from 'components/back-button';
+import { ItemName } from 'components/custom-cell';
+import { Table } from 'components/table';
+
+import CustomTableHeader from './custom-table-header';
+import StatusCard from './status-card';
+
+const RentalApplicationsReport = () => {
+  const rentalApplicationsReportData = [
+    {
+      unit: {
+        title: 'Unit 1',
+        subtitle: 'Address 1',
+      },
+      title: 'Lorem ipsum dolor sit',
+      date: '2021-01-01',
+    },
+  ];
+
+  const columns = [
+    {
+      Header: 'Unit name',
+      accessor: 'unit',
+      Cell: ItemName,
+      width: '300px',
+    },
+    {
+      Header: 'Title',
+      accessor: 'title',
+      width: '450px',
+    },
+    {
+      Header: 'Date',
+      accessor: 'date',
+      width: '300px',
+    },
+  ];
+
+  return (
+    <div>
+      <div>
+        <BackButton />
+        <h1 className="fw-bold h4 mt-1">Rental applications report</h1>
+      </div>
+
+      <Card className="border-0 p-0 page-section my-3">
+        <Card.Body>
+          <Formik
+            initialValues={{
+              from_date: '',
+              to_date: '',
+            }}
+            onSubmit={values => {
+              console.log('::: values', values);
+            }}
+          >
+            {({ handleSubmit }) => (
+              <Form className="text-start" noValidate onSubmit={handleSubmit}>
+                <Row>
+                  <Col sm={3} lg={2}>
+                    <Form.Group className="mb-4" controlId="RentalApplicationsReportFormFromDate">
+                      <Form.Label className="form-label-md">From date</Form.Label>
+                      <Field name="from_date" type="date" as={Form.Control} placeholder="Type here" />
+                    </Form.Group>
+                  </Col>
+                  <Col sm={3} lg={2}>
+                    <Form.Group className="mb-4" controlId="RentalApplicationsReportFormToDate">
+                      <Form.Label className="form-label-md">To date</Form.Label>
+                      <Field name="to_date" type="date" as={Form.Control} placeholder="Type here" />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <div className="d-flex justify-content-end mt-3">
+                  <Button variant="light border-primary" className="px-4 py-1 me-3">
+                    Cancel
+                  </Button>
+                  <Button variant="primary" type="submit" className="px-4 py-1">
+                    Get Report
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </Card.Body>
+      </Card>
+
+      <StatusCard
+        data={[
+          { name: 'Completed', value: 400, color: '#189915' },
+          { name: 'Incomplete', value: 300, color: '#CFCFCF' },
+        ]}
+        total={1000}
+      />
+
+      <Table
+        wrapperClass="border"
+        className="m-0"
+        customHeader={
+          <CustomTableHeader
+            handleCreateNewRecord={() => {
+              console.log('::: values');
+            }}
+            total={rentalApplicationsReportData.length}
+          />
+        }
+        showTotal={false}
+        shadow={false}
+        data={rentalApplicationsReportData}
+        columns={columns}
+        total={rentalApplicationsReportData.length}
+      />
+    </div>
+  );
+};
+
+export default RentalApplicationsReport;

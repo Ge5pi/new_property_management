@@ -1,0 +1,129 @@
+#meganos-toast-container .toast-container-overlay > div {
+  margin-bottom: 10px;
+  animation: slide-in 0.2s;
+  transition: all 0.3s ease;
+  --bs-toast-max-width: 480px !important;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+#meganos-toast-container .toast-container-overlay {
+  position: fixed !important;
+  z-index: 10350;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Toast Message */
+.css-laiely {
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  border-radius: 4px;
+  box-shadow: none;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  display: flex;
+  padding: 6px 16px;
+}
+
+.css-1j45p21 {
+  width: 100%;
+  margin-left: auto;
+  box-sizing: border-box;
+  margin-right: auto;
+  display: block;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: calc(64px + 36px);
+  font-family: Arial;
+  max-width: 105ch;
+  position: relative;
+}
+
+.css-1l54tgj {
+  margin-right: 12px;
+  padding: 7px 0px;
+  display: flex;
+  font-size: 22px;
+  opacity: 0.9;
+}
+
+.css-1xsto0d {
+  padding: 8px 0px;
+  min-width: 0px;
+  overflow: auto;
+}
+
+.css-1xsto0d .t-description {
+  white-space: pre-wrap;
+}
+
+.css-1jvvlz4 {
+  margin: -2px 0px 0.35em;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  font-weight: 500;
+}
+
+.css-1mzcepu {
+  display: flex;
+  align-items: flex-start;
+  padding: 4px 0px 0px 16px;
+  margin-left: auto;
+  margin-right: -8px;
+}
+
+.css-q28n79 {
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  background-color: transparent;
+  outline: 0px;
+  border: none !important;
+  margin: 0px;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  appearance: none;
+  text-decoration: none;
+  text-align: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  overflow: visible;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  color: inherit;
+  padding: 5px;
+  font-size: 1.125rem;
+  width: 0.5em !important;
+  height: 0.5em !important;
+}
+
+.css-1cw4hi4 {
+  user-select: none;
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  fill: currentcolor;
+  flex-shrink: 0;
+  transition: fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  font-size: inherit;
+}

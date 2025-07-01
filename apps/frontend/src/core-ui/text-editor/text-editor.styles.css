@@ -1,0 +1,81 @@
+.ProseMirror pre {
+  white-space: pre-wrap;
+}
+
+.tiptap pre {
+  border-left: 1px solid rgba(var(--sk_foreground_low_solid, 221, 221, 221), 1);
+  border-right: 1px solid rgba(var(--sk_foreground_low_solid, 221, 221, 221), 1);
+  background: rgba(var(--sk_foreground_min_solid, 248, 248, 248), 1);
+  font-variant-ligatures: none;
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: normal;
+  tab-size: 4;
+  margin-bottom: 14px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 12px;
+  line-height: 1.50001;
+  position: relative;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+}
+
+.tiptap pre > code {
+  color: #2e2b29 !important;
+}
+
+.tiptap code {
+  font-size: 0.85rem;
+  color: var(--bs-info);
+  padding: 0.25em 0.3em;
+  font-weight: 400;
+}
+
+.tiptap-list li > p {
+  margin: 0 !important;
+}
+
+button.tiptap-toggleButton,
+.tiptap-toggleButton > button {
+  font-weight: 500 !important;
+  font-family: 'Satoshi-Bold' !important;
+  padding: 4px !important;
+  margin: 2px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+button.tiptap-toggleButton:not(.active):not(.disabled):not(:disabled),
+.tiptap-toggleButton > button:not(.active):not(.disabled):not(:disabled) {
+  border: 0 !important;
+}
+
+button.tiptap-toggleButton.active,
+.tiptap-toggleButton > button.active {
+  --bs-bg-opacity: 0.8;
+  background-color: rgba(var(--bs-primary-rgb), var(--bs-bg-opacity)) !important;
+  border-color: #ccc !important;
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+
+button.tiptap-toggleButton:disabled:not(.active),
+.tiptap-toggleButton > button:disabled:not(.active) {
+  --bs-bg-opacity: 0.8;
+  color: rgba(var(--bs-primary-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--bs-gray-300);
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.rbt-menu > a.dropdown-item:has(.tiptap-font-style-names) {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  font-size: small !important;
+}

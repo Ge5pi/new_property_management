@@ -1,0 +1,31 @@
+#secondary-sidebar {
+  max-width: 100%;
+  min-width: 257px !important;
+  padding-top: 12px !important;
+}
+
+#secondary-content-wrapper {
+  width: calc(100% - 257px);
+  min-height: 100vh;
+  transition: all 0.3s;
+  background-color: #fbfbfb !important;
+}
+.sidebar-list {
+  margin: 0;
+  list-style: none;
+  padding: 24px 0 0;
+}
+.sidebar-list-item {
+  display: inline-block;
+  color: #686868;
+  text-decoration: none;
+}
+
+.sidebar-list-item.active {
+  text-decoration: underline;
+  color: black;
+}
+
+.sidebar-list li:not(:last-child) .sidebar-list-item {
+  margin-bottom: 20px;
+}

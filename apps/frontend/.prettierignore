@@ -1,0 +1,8 @@
+
+node_modules
+# Ignore artifacts:
+build
+coverage
+dist
+public
+src/core-ui/css/bootstrap.min.css

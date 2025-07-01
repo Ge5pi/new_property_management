@@ -1,0 +1,44 @@
+.status-rejected:not(:disabled) {
+  background-color: #ff6d6d !important;
+}
+
+.status-rejected .select-selected:not(:hover):not(:focus):not(:disabled):not(.is-valid):not(.is-invalid) {
+  border: #a61f1f 1px solid !important;
+}
+
+.status-waiting:not(:disabled) {
+  background-color: #ffb36d !important;
+}
+
+.status-waiting .select-selected:not(:hover):not(:focus):not(:disabled):not(.is-valid):not(.is-invalid) {
+  border: #ba6a21 1px solid !important;
+}
+
+.status-approved:not(:disabled) {
+  background-color: #62f15f !important;
+}
+
+.status-approved .select-selected:not(:hover):not(:focus):not(:disabled):not(.is-valid):not(.is-invalid) {
+  border: #35a733 1px solid !important;
+}
+
+.status-pending:not(:disabled) {
+  background-color: #b7dee7 !important;
+}
+
+.status-pending .select-selected:not(:hover):not(:focus):not(:disabled):not(.is-valid):not(.is-invalid) {
+  border: #73b6c6 1px solid !important;
+}
+
+.status-draft:not(:disabled) {
+  background-color: #fbc02d !important;
+}
+
+.status-draft .select-selected:not(:hover):not(:focus):not(:disabled):not(.is-valid):not(.is-invalid) {
+  border: #fbc02d 1px solid !important;
+}
+
+.select-status-wrapper {
+  width: 200px;
+  max-width: 100%;
+}

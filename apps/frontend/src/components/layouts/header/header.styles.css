@@ -1,0 +1,38 @@
+.navbar-heading {
+  color: inherit !important;
+  font-family: 'Satoshi-Black' !important;
+}
+
+@media (max-width: 480px) {
+  .navbar-heading {
+    font-size: 1rem !important;
+  }
+}
+
+.form-95 {
+  width: 100% !important;
+}
+
+@media (max-width: 991px) {
+  .form-95 .search-input-wrapper {
+    margin-left: 5px !important;
+  }
+
+  .auth-navbar-items {
+    flex-grow: 1 !important;
+    margin-right: 0.5rem !important;
+  }
+}
+
+.btn.navbar-btn {
+  background-color: transparent;
+  border: none;
+}
+
+.btn.navbar-btn:hover {
+  background-color: #f9f8fc;
+}
+
+.btn.navbar-btn-light {
+  color: #8b8b8b;
+}

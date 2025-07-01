@@ -1,0 +1,3 @@
+.announcements-steps-card :is(.CustomStepper-stepper, .CustomStepperItem) {
+  padding: 0 1.5rem;
+}

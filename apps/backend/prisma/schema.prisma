@@ -1,15 +1,1811 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Subscription {
+  id           String @id @default(cuid())
+  purchased_by User?  @relation(fields: [purchasedById], references: [id])
+  purchasedById String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id                     String        @id @default(cuid())
+  email                  String        @unique
+  username               String        @unique
+  company_name           String?
+  telephone_number       String?
+  mobile_number          String
+  secondary_email        String?
+  other_information      String?
+  associated_subscription Subscription? @relation(fields: [associatedSubscriptionId], references: [id])
+  associatedSubscriptionId String?
+  stripe_customer        String? // Assuming this will store the Stripe Customer ID
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+
+  purchased_subscription Subscription?
+  tenants                Tenant[]
+  assigned_work_orders   WorkOrder[]
+  project_expenses       ProjectExpense[]
+}
+
+model CommonInfoAbstractModel {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  created_by  String?
+  modified_by String?
+
+  @@map("common_info_abstract_model")
+}
+
+model Invoice {
+  id                     String    @id @default(cuid())
+  business_informationId String?
+  leaseId                String
+  parent_propertyId      String
+  unitId                 String
+  interval_start_date    DateTime  @db.Date
+  interval_end_date      DateTime  @db.Date
+  due_date               DateTime  @db.Date
+  rent_amount            Decimal   @db.Decimal(10, 2)
+  payed_at               DateTime? @db.Date
+  payed_late_fee         Decimal?  @db.Decimal(10, 2)
+  status                 String    @default("UNPAID")
+  arrears_amount         Decimal   @default(0) @db.Decimal(10, 2)
+  arrear_ofId            String?
+  total_paid_amount      Decimal   @default(0) @db.Decimal(10, 2)
+
+  business_information BusinessInformation? @relation(fields: [business_informationId], references: [id])
+  lease                Lease                @relation(fields: [leaseId], references: [id])
+  parent_property      Property             @relation(fields: [parent_propertyId], references: [id])
+  unit                 Unit                 @relation(fields: [unitId], references: [id])
+  arrear_of            Invoice?             @relation("ArrearOfInvoice", fields: [arrear_ofId], references: [id])
+  arrears              Invoice[]            @relation("ArrearOfInvoice")
+  charges              Charge[]
+  payment              Payment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Charge {
+  id                String    @id @default(cuid())
+  title             String
+  description       String
+  charge_type       String
+  status            String?
+  amount            Decimal   @db.Decimal(10, 2)
+  gl_account        String
+  tenantId          String
+  parent_propertyId String
+  unitId            String
+  notes             String
+  parent_chargeId   String?
+  invoiceId         String?
+
+  tenant          Tenant             @relation(fields: [tenantId], references: [id])
+  parent_property Property           @relation(fields: [parent_propertyId], references: [id])
+  unit            Unit               @relation(fields: [unitId], references: [id])
+  parent_charge   Charge?            @relation("ParentCharge", fields: [parent_chargeId], references: [id])
+  one_time_charges Charge[]          @relation("ParentCharge")
+  invoice         Invoice?           @relation(fields: [invoiceId], references: [id])
+  attachments     ChargeAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ChargeAttachment {
+  id        String   @id @default(cuid())
+  name      String
+  file      String
+  file_type String
+  chargeId  String
+
+  charge Charge @relation(fields: [chargeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Account {
+  id            String   @id @default(cuid())
+  bank_name     String
+  branch_name   String
+  branch_code   String
+  account_title String
+  account_number String
+  iban          String
+  address       String?
+  description   String?
+  notes         String?
+
+  attachments AccountAttachment[]
+  payments    Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model AccountAttachment {
+  id        String   @id @default(cuid())
+  name      String
+  file      String
+  file_type String
+  accountId String
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Payment {
+  id             String    @id @default(cuid())
+  invoiceId      String    @unique
+  amount         Decimal   @db.Decimal(10, 2)
+  payment_method String
+  payment_date   DateTime  @db.Date
+  remarks        String?
+  notes          String?
+  accountId      String?
+
+  invoice     Invoice             @relation(fields: [invoiceId], references: [id])
+  account     Account?            @relation(fields: [accountId], references: [id])
+  attachments PaymentAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PaymentAttachment {
+  id        String   @id @default(cuid())
+  name      String
+  file      String
+  file_type String
+  paymentId String
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model GeneralLedgerAccount {
+  id                          String  @id @default(cuid())
+  account_type                String
+  sub_account_type            String
+  account_holder_content_type String // This will likely need to be handled differently in Prisma, perhaps as a polymorphic relation or separate fields
+  account_holder_object_id    Int
+  label                       String?
+
+  transactions GeneralLedgerTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([account_holder_content_type, account_holder_object_id, account_type, sub_account_type, label])
+}
+
+model GeneralLedgerTransaction {
+  id               String  @id @default(cuid())
+  transaction_type String
+  amount           Decimal @db.Decimal(10, 2)
+  description      String
+  gl_accountId     String
+
+  gl_account GeneralLedgerAccount @relation(fields: [gl_accountId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  groups      String[] // This will store group IDs as strings
+  users       User[]   @relation("UserRoles")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyUpcomingActivity {
+  id                String   @id @default(cuid())
+  title             String
+  description       String?
+  date              DateTime @db.Date
+  start_time        DateTime? @db.Time
+  end_time          DateTime? @db.Time
+  labelId           String?
+  assign_toId       String?
+  status            Boolean  @default(true)
+  parent_propertyId String
+
+  label           Label?   @relation(fields: [labelId], references: [id])
+  assign_to       User?    @relation(fields: [assign_toId], references: [id])
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Property {
+  id                               String    @id @default(cuid())
+  name                             String
+  address                          String
+  property_typeId                  String
+  is_cat_allowed                   Boolean   @default(false)
+  is_dog_allowed                   Boolean   @default(false)
+  is_smoking_allowed               Boolean   @default(false)
+  additional_fees_gl_account       String?
+  additional_fees_percentage       Int?
+  addition_fees_suppress           Boolean   @default(false)
+  lease_fees_amount                Decimal?  @db.Decimal(10, 2)
+  lease_fees_percentage            Int?
+  lease_fees_commission_type       String?
+  tax_authority                    String?
+  portfolio                        String?
+  description                      String?
+  renters_tax_location_code        String?
+  property_owner_license           String?
+  year_built                       Int?
+  management_start_date            DateTime? @db.Date
+  management_end_date              DateTime? @db.Date
+  management_end_reason            String?
+  nsf_fee                          Decimal?  @db.Decimal(10, 2)
+  management_fees_amount           Decimal?  @db.Decimal(10, 2)
+  management_fees_percentage       Int?
+  management_commission_type       String?
+  notes                            String?
+  maintenance_limit_amount         Decimal?  @db.Decimal(10, 2)
+  insurance_expiration_date        DateTime? @db.Date
+  has_home_warranty_coverage       Boolean   @default(false)
+  home_warranty_company            String?
+  home_warranty_expiration_date    DateTime? @db.Date
+  maintenance_notes                String?
+  default_lease_templateId         String?
+  default_lease_agenda             String?
+  default_lease_renewal_templateId String?
+  default_lease_renewal_agenda     String?
+  default_lease_renewal_letter_template String?
+  default_renewal_terms            String?
+  default_renewal_charge_by        Decimal?  @db.Decimal(10, 2)
+  default_renewal_additional_fee   Decimal?  @db.Decimal(10, 2)
+  rental_application_templateId    String?
+
+  property_type                  PropertyType?           @relation(fields: [property_typeId], references: [id])
+  default_lease_template         LeaseTemplate?          @relation("DefaultLeaseTemplateProperties", fields: [default_lease_templateId], references: [id])
+  default_lease_renewal_template LeaseTemplate?          @relation("DefaultLeaseRenewalProperties", fields: [default_lease_renewal_templateId], references: [id])
+  rental_application_template    RentalApplicationTemplate? @relation(fields: [rental_application_templateId], references: [id])
+
+  invoices                 Invoice[]
+  charges                  Charge[]
+  upcoming_activities      PropertyUpcomingActivity[]
+  utility_billings         PropertyUtilityBilling[]
+  late_fee_policy          PropertyLateFeePolicy?
+  attachments              PropertyAttachment[]
+  lease_template_attachments PropertyLeaseTemplateAttachment[]
+  lease_renewal_attachments PropertyLeaseRenewalAttachment[]
+  photos                   PropertyPhoto[]
+  owners                   PropertyOwner[]
+  rentable_items           RentableItem[]
+  units                    Unit[]
+  projects                 Project[]
+  communication_notes      Note[]
+  announcements            Announcement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyUtilityBilling {
+  id                           String   @id @default(cuid())
+  utility                      String
+  vendorId                     String
+  vendor_bill_gl               String
+  tenant_charge_gl             String
+  owner_contribution_percentage Int
+  tenant_contribution_percentage Int
+  parent_propertyId            String
+
+  vendor          Vendor   @relation(fields: [vendorId], references: [id])
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyLateFeePolicy {
+  id                        String    @id @default(cuid())
+  start_date                DateTime? @db.Date
+  end_date                  DateTime? @db.Date
+  late_fee_type             String?
+  base_amount_fee           Decimal?  @db.Decimal(10, 2)
+  eligible_charges          String?
+  charge_daily_late_fees    Boolean   @default(false)
+  daily_amount_per_month_max Decimal?  @db.Decimal(10, 2)
+  grace_period_type         String?
+  grace_period              Int?
+  parent_propertyId         String    @unique
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyAttachment {
+  id                String   @id @default(cuid())
+  name              String
+  file              String
+  file_type         String
+  parent_propertyId String
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyLeaseTemplateAttachment {
+  id                String   @id @default(cuid())
+  name              String
+  file              String
+  file_type         String
+  parent_propertyId String
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyLeaseRenewalAttachment {
+  id                String   @id @default(cuid())
+  name              String
+  file              String
+  file_type         String
+  parent_propertyId String
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyPhoto {
+  id                String  @id @default(cuid())
+  image             String
+  is_cover          Boolean @default(false)
+  parent_propertyId String
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([parent_propertyId, is_cover])
+}
+
+model PropertyOwner {
+  id                   String    @id @default(cuid())
+  percentage_owned     Int
+  parent_propertyId    String
+  payment_type         String
+  contract_expiry      DateTime  @db.Date
+  reserve_funds        Decimal   @db.Decimal(10, 2)
+  fiscal_year_end      String
+  ownership_start_date DateTime  @db.Date
+  ownerId              String
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+  owner           Owner    @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([parent_propertyId, ownerId])
+}
+
+model RentableItem {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  amount            Decimal  @db.Decimal(10, 2)
+  gl_account        String
+  tenantId          String
+  status            Boolean  @default(false)
+  parent_propertyId String
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Unit {
+  id                     String    @id @default(cuid())
+  name                   String
+  unit_typeId            String
+  market_rent            Decimal?  @db.Decimal(10, 2)
+  future_market_rent     Decimal?  @db.Decimal(10, 2)
+  effective_date         DateTime? @db.Date
+  application_fee        Decimal?  @db.Decimal(10, 2)
+  tags                   Tag[]     @relation("UnitTags")
+  estimate_turn_over_cost Decimal?  @db.Decimal(10, 2)
+  address                String?
+  ready_for_show_on      DateTime? @db.Date
+  virtual_showing_available Boolean @default(false)
+  utility_bills          Boolean   @default(false)
+  utility_bills_date     DateTime? @db.Date
+  lock_box               String?
+  description            String?
+  non_revenues_status    Boolean   @default(false)
+  balance                Decimal?  @db.Decimal(10, 2)
+  total_charges          Decimal?  @db.Decimal(10, 2)
+  total_credit           Decimal?  @db.Decimal(10, 2)
+  due_amount             Decimal?  @db.Decimal(10, 2)
+  total_payable          Decimal?  @db.Decimal(10, 2)
+  parent_propertyId      String
+
+  unit_type       UnitType             @relation(fields: [unit_typeId], references: [id])
+  parent_property Property             @relation(fields: [parent_propertyId], references: [id])
+  invoices        Invoice[]
+  charges         Charge[]
+  leases          Lease[]
+  applicants      Applicant[]
+  upcoming_activities UnitUpcomingActivity[]
+  photos          UnitPhoto[]
+  inspections     Inspection[]
+  projects        Project[]
+  fixed_assets    FixedAsset[]
+  emails          Email[]
+  announcements   Announcement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model UnitUpcomingActivity {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime @db.Date
+  start_time  DateTime? @db.Time
+  end_time    DateTime? @db.Time
+  labelId     String?
+  assign_toId String?
+  status      Boolean  @default(true)
+  unitId      String
+
+  label     Label? @relation(fields: [labelId], references: [id])
+  assign_to User?  @relation(fields: [assign_toId], references: [id])
+  unit      Unit   @relation(fields: [unitId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model UnitPhoto {
+  id       String  @id @default(cuid())
+  image    String
+  is_cover Boolean @default(false)
+  unitId   String
+
+  unit Unit @relation(fields: [unitId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([unitId, is_cover])
+}
+
+model UnitType {
+  id                      String   @id @default(cuid())
+  name                    String
+  bed_rooms               Int?
+  bath_rooms              Int?
+  square_feet             Int?
+  market_rent             Decimal? @db.Decimal(10, 2)
+  future_market_rent      Decimal? @db.Decimal(10, 2)
+  effective_date          DateTime? @db.Date
+  application_fee         Decimal? @db.Decimal(10, 2)
+  tags                    Tag[]    @relation("UnitTypeTags")
+  estimate_turn_over_cost Decimal? @db.Decimal(10, 2)
+  is_cat_allowed          Boolean  @default(false)
+  is_dog_allowed          Boolean  @default(false)
+  is_smoking_allowed      Boolean  @default(false)
+  marketing_title         String?
+  marketing_description   String?
+  marketing_youtube_url   String?
+  parent_propertyId       String
+
+  parent_property Property @relation(fields: [parent_propertyId], references: [id])
+  units           Unit[]
+  photos          UnitTypePhoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model UnitTypePhoto {
+  id          String  @id @default(cuid())
+  image       String
+  is_cover    Boolean @default(false)
+  unit_typeId String
+
+  unit_type UnitType @relation(fields: [unit_typeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([unit_typeId, is_cover])
+}
+
+model LeaseTemplate {
+  id                     String   @id @default(cuid())
+  name                   String
+  description            String?
+  rules_and_policies     String[]
+  condition_of_premises  String[]
+  right_of_inspection    Boolean  @default(true)
+  conditions_of_moving_out String[]
+  releasing_policies     String[]
+  final_statement        String?
+
+  default_lease_properties         Property[] @relation("DefaultLeaseTemplateProperties")
+  default_lease_renewal_properties Property[] @relation("DefaultLeaseRenewalProperties")
+  leases                           Lease[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Lease {
+  id                     String    @id @default(cuid())
+  rental_applicationId   String
+  lease_type             String
+  start_date             DateTime  @db.Date
+  end_date               DateTime  @db.Date
+  lease_templateId       String?
+  rent_cycle             String
+  amount                 Decimal   @db.Decimal(10, 2)
+  gl_account             String
+  description            String?   @default("rent")
+  due_date               DateTime  @db.Date
+  status                 String    @default("ACTIVE")
+  closed_on              DateTime? @db.Date
+  unitId                 String
+  rules_and_policies     String[]
+  condition_of_premises  String[]
+  right_of_inspection    Boolean?
+  conditions_of_moving_out String[]
+  releasing_policies     String[]
+  final_statement        String?
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+  lease_template     LeaseTemplate?    @relation(fields: [lease_templateId], references: [id])
+  unit               Unit              @relation(fields: [unitId], references: [id])
+  primary_tenant     Tenant?
+  secondary_tenants  SecondaryTenant[]
+  invoices           Invoice[]
+  payment            Payment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([status, unitId])
+}
+
+model SecondaryTenant {
+  id           String   @id @default(cuid())
+  first_name   String
+  last_name    String
+  email        String?
+  phone_number String
+  birthday     DateTime @db.Date
+  tax_payer_id String
+  description  String?
+  leaseId      String
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationTemplate {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?
+  general_info     Boolean  @default(true)
+  personal_details Boolean  @default(true)
+  rental_history   Boolean  @default(true)
+  financial_info   Boolean  @default(true)
+  dependents_info  Boolean  @default(true)
+  other_info       Boolean  @default(true)
+
+  properties        Property[]
+  rental_application RentalApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Applicant {
+  id                               String   @id @default(cuid())
+  first_name                       String
+  last_name                        String
+  email                            String
+  allow_email_for_rental_application Boolean  @default(false)
+  phone_number                     String
+  unitId                           String
+
+  unit             Unit            @relation(fields: [unitId], references: [id])
+  rental_application RentalApplication?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplication {
+  id                               String    @id @default(cuid())
+  applicantId                      String    @unique
+  status                           String    @default("DRAFT")
+  desired_move_in_date             DateTime? @db.Date
+  legal_first_name                 String?
+  middle_name                      String?
+  legal_last_name                  String?
+  application_type                 String?
+  phone_number                     String[]
+  emails                           String[]
+  notes                            String?
+  birthday                         DateTime? @db.Date
+  ssn_or_tin                       String?
+  driving_license_number           String?
+  employer_name                    String?
+  employer_address                 String?
+  employer_address_2               String?
+  employer_phone_number            String?
+  employment_city                  String?
+  employment_zip_code              String?
+  employment_country               String?
+  monthly_salary                   Decimal?  @db.Decimal(10, 2)
+  position_held                    String?
+  years_worked                     Int?
+  supervisor_name                  String?
+  supervisor_phone_number          String?
+  supervisor_email                 String?
+  supervisor_title                 String?
+  is_defendant_in_any_lawsuit      Boolean   @default(false)
+  is_convicted                     Boolean   @default(false)
+  have_filed_case_against_landlord Boolean   @default(false)
+  is_smoker                        Boolean   @default(false)
+  general_info                     Boolean   @default(false)
+  personal_details                 Boolean  @default(false)
+  rental_history                   Boolean  @default(false)
+  financial_info                   Boolean  @default(false)
+  dependents_info                  Boolean  @default(false)
+  other_info                       Boolean  @default(false)
+  is_general_info_filled           Boolean  @default(false)
+  is_personal_details_filled       Boolean  @default(false)
+  is_rental_history_filled         Boolean  @default(false)
+  is_financial_info_filled         Boolean  @default(false)
+  is_dependents_filled             Boolean  @default(false)
+  is_other_info_filled             Boolean  @default(false)
+
+  applicant         Applicant                               @relation(fields: [applicantId], references: [id])
+  leases            Lease[]
+  emergency_contacts RentalApplicationEmergencyContact[]
+  residential_history RentalApplicationResidentialHistory[]
+  financial_information RentalApplicationFinancialInformation[]
+  additional_income RentalApplicationAdditionalIncome[]
+  dependents        RentalApplicationDependent[]
+  pets              RentalApplicationPets[]
+  attachments       RentalApplicationAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationEmergencyContact {
+  id                 String   @id @default(cuid())
+  name               String
+  phone_number       String
+  relationship       String
+  address            String
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationResidentialHistory {
+  id                 String    @id @default(cuid())
+  current_address    String
+  current_address_2  String?
+  current_city       String?
+  current_zip_code   String?
+  current_country    String
+  resident_from      DateTime? @db.Date
+  resident_to        DateTime? @db.Date
+  landlord_name      String?
+  landlord_phone_number String?
+  landlord_email     String?
+  reason_of_leaving  String?
+  monthly_rent       Decimal?  @db.Decimal(10, 2)
+  current_state      String?
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationFinancialInformation {
+  id                 String @id @default(cuid())
+  name               String
+  account_type       String
+  bank               String
+  account_number     String
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationAdditionalIncome {
+  id                 String  @id @default(cuid())
+  monthly_income     Decimal @db.Decimal(10, 2)
+  source_of_income   String
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationDependent {
+  id                 String    @id @default(cuid())
+  first_name         String
+  last_name          String
+  birthday           DateTime  @db.Date
+  relationship       String
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationPets {
+  id                 String   @id @default(cuid())
+  name               String
+  pet_type           String
+  weight             Float?
+  age                Int?
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model RentalApplicationAttachment {
+  id                 String   @id @default(cuid())
+  name               String
+  file               String
+  file_type          String
+  rental_applicationId String
+
+  rental_application RentalApplication @relation(fields: [rental_applicationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Tenant {
+  id           String   @id @default(cuid())
+  first_name   String
+  last_name    String
+  email        String
+  phone_number String
+  leaseId      String   @unique
+  userId       String
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  charges             Charge[]
+  rentable_items      RentableItem[]
+  upcoming_activities TenantUpcomingActivity[]
+  attachments         TenantAttachment[]
+  emails              Email[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model TenantUpcomingActivity {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime @db.Date
+  start_time  DateTime? @db.Time
+  end_time    DateTime? @db.Time
+  labelId     String?
+  assign_toId String?
+  status      Boolean  @default(true)
+  tenantId    String
+
+  label     Label? @relation(fields: [labelId], references: [id])
+  assign_to User?  @relation(fields: [assign_toId], references: [id])
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model TenantAttachment {
+  id       String   @id @default(cuid())
+  name     String
+  file     String
+  file_type String
+  tenantId String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model VendorType {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+
+  vendors    Vendor[]
+  work_orders WorkOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Vendor {
+  id                           String   @id @default(cuid())
+  first_name                   String
+  last_name                    String
+  company_name                 String
+  use_company_name_as_display_name Boolean
+  vendor_typeId                String
+  gl_account                   String
+  personal_contact_numbers     String[]
+  business_contact_numbers     String[]
+  personal_emails              String[]
+  business_emails              String[]
+  website                      String
+  insurance_provide_name       String
+  insurance_policy_number      String
+  insurance_expiry_date        DateTime @db.Date
+  tax_identity_type            String
+  tax_payer_id                 String
+
+  vendor_type      VendorType             @relation(fields: [vendor_typeId], references: [id])
+  utility_billings PropertyUtilityBilling[]
+  addresses        VendorAddress[]
+  attachments      VendorAttachment[]
+  work_orders      WorkOrder[]
+  purchase_orders  PurchaseOrder[]
+  inventory        Inventory[]
+  emails           Email[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model VendorAddress {
+  id           String @id @default(cuid())
+  street_address String
+  city         String
+  state        String
+  country      String
+  zip          String
+  vendorId     String
+
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model VendorAttachment {
+  id       String   @id @default(cuid())
+  name     String
+  file     String
+  file_type String
+  vendorId String
+
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Owner {
+  id                       String   @id @default(cuid())
+  first_name               String
+  last_name                String
+  company_name             String?
+  personal_contact_numbers String[]
+  company_contact_numbers  String[]
+  personal_emails          String[]
+  company_emails           String[]
+  street_address           String?
+  city                     String?
+  state                    String?
+  zip                      String?
+  country                  String?
+  tax_payer                String
+  tax_payer_id             String
+  bank_account_title       String?
+  bank_name                String?
+  bank_branch              String?
+  bank_routing_number      String?
+  bank_account_number      String?
+  notes                    String?
+  is_company_name_as_tax_payer Boolean  @default(false)
+  is_use_as_display_name   Boolean  @default(false)
+
+  owned_properties    PropertyOwner[]
+  upcoming_activities OwnerUpcomingActivity[]
+  emails              Email[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model OwnerUpcomingActivity {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime @db.Date
+  start_time  DateTime? @db.Time
+  end_time    DateTime? @db.Time
+  labelId     String?
+  assign_toId String?
+  status      Boolean  @default(true)
+  ownerId     String
+
+  label     Label? @relation(fields: [labelId], references: [id])
+  assign_to User?  @relation(fields: [assign_toId], references: [id])
+  owner     Owner  @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ServiceRequest {
+  id                             String   @id @default(cuid())
+  unitId                         String
+  order_type                     String
+  permission_to_enter            Boolean  @default(false)
+  additional_information_for_entry String?
+  priority                       String
+  subject                        String
+  description                    String
+
+  unit        Unit                   @relation(fields: [unitId], references: [id])
+  attachments ServiceRequestAttachment[]
+  work_orders WorkOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ServiceRequestAttachment {
+  id              String   @id @default(cuid())
+  name            String
+  file            String
+  file_type       String
+  service_requestId String
+
+  service_request ServiceRequest @relation(fields: [service_requestId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model WorkOrder {
+  id                  String   @id @default(cuid())
+  is_recurring        Boolean  @default(false)
+  cycle               String?
+  status              String   @default("OPEN")
+  order_type          String
+  job_description     String?
+  vendor_instructions String?
+  vendor_trade        String?
+  vendor_typeId       String
+  vendorId            String
+  email_vendor        Boolean
+  request_receipt     Boolean
+  assign_toId         String?
+  owner_approved      Boolean
+  follow_up_date      DateTime @db.Date
+  service_requestId   String
+
+  vendor_type   VendorType     @relation(fields: [vendor_typeId], references: [id])
+  vendor        Vendor         @relation(fields: [vendorId], references: [id])
+  assign_to     User?          @relation(fields: [assign_toId], references: [id])
+  service_request ServiceRequest @relation(fields: [service_requestId], references: [id])
+  labors        Labor[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Labor {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime @db.Date
+  hours       Int
+  description String
+  work_orderId String
+
+  work_order WorkOrder @relation(fields: [work_orderId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Inspection {
+  id       String   @id @default(cuid())
+  name     String
+  date     DateTime @db.Date
+  unitId   String
+
+  unit  Unit  @relation(fields: [unitId], references: [id])
+  areas Area[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Area {
+  id           String @id @default(cuid())
+  name         String
+  inspectionId String
+
+  inspection Inspection @relation(fields: [inspectionId], references: [id])
+  items      AreaItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model AreaItem {
+  id        String @id @default(cuid())
+  name      String
+  condition String
+  areaId    String
+
+  area Area @relation(fields: [areaId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Project {
+  id                String   @id @default(cuid())
+  name              String
+  description       String
+  status            String   @default("PENDING")
+  parent_propertyId String
+  units             Unit[]   @relation("ProjectUnits")
+  select_all_units  Boolean
+  budget            Decimal  @db.Decimal(10, 2)
+  gl_account        String
+  start_date        DateTime @db.Date
+  end_date          DateTime? @db.Date
+
+  parent_property Property         @relation(fields: [parent_propertyId], references: [id])
+  expenses        ProjectExpense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ProjectExpense {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  date        DateTime @db.Date
+  assigned_toId String
+  projectId   String
+
+  assigned_to User    @relation(fields: [assigned_toId], references: [id])
+  project     Project @relation(fields: [projectId], references: [id])
+  attachments ProjectExpenseAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ProjectExpenseAttachment {
+  id              String   @id @default(cuid())
+  name            String
+  file            String
+  file_type       String
+  project_expenseId String
+
+  project_expense ProjectExpense @relation(fields: [project_expenseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PurchaseOrder {
+  id                   String    @id @default(cuid())
+  vendorId             String?
+  description          String
+  required_by_date     DateTime  @db.Date
+  tax                  Decimal?  @db.Decimal(10, 2)
+  tax_charge_type      String?
+  shipping             Decimal?  @db.Decimal(10, 2)
+  shipping_charge_type String?
+  discount             Decimal?  @db.Decimal(10, 2)
+  discount_charge_type String?
+  notes                String?
+
+  vendor Vendor? @relation(fields: [vendorId], references: [id])
+  items  PurchaseOrderItem[]
+  attachments PurchaseOrderAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PurchaseOrderItem {
+  id             String  @id @default(cuid())
+  inventory_itemId String
+  cost           Decimal @db.Decimal(10, 2)
+  quantity       Int
+  purchase_orderId String
+
+  inventory_item Inventory      @relation(fields: [inventory_itemId], references: [id])
+  purchase_order PurchaseOrder @relation(fields: [purchase_orderId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PurchaseOrderAttachment {
+  id               String   @id @default(cuid())
+  name             String
+  file             String
+  file_type        String
+  purchase_orderId String
+
+  purchase_order PurchaseOrder @relation(fields: [purchase_orderId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Inventory {
+  id                  String   @id @default(cuid())
+  name                String
+  item_typeId         String?
+  description         String
+  part_number         String
+  vendorId            String?
+  quantity            Int
+  expense_account     String
+  cost                Decimal  @db.Decimal(10, 2)
+  locationId          String?
+  bin_or_shelf_number String?
+
+  item_type    InventoryItemType? @relation(fields: [item_typeId], references: [id])
+  vendor       Vendor?            @relation(fields: [vendorId], references: [id])
+  location     InventoryLocation? @relation(fields: [locationId], references: [id])
+  purchase_order_items PurchaseOrderItem[]
+  fixed_assets FixedAsset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model FixedAsset {
+  id                     String    @id @default(cuid())
+  status                 String?
+  placed_in_service_date DateTime? @db.Date
+  warranty_expiration_date DateTime? @db.Date
+  unitId                 String
+  inventory_itemId       String
+  quantity               Int
+  cost                   Decimal   @db.Decimal(10, 2)
+
+  unit          Unit     @relation(fields: [unitId], references: [id])
+  inventory_item Inventory @relation(fields: [inventory_itemId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Contact {
+  id                String   @id @default(cuid())
+  name              String
+  categoryId        String
+  primary_contact   String
+  secondary_contact String?
+  email             String?
+  website           String?
+  street_address    String?
+  display_to_tenants Boolean
+  selective         Boolean
+
+  category ContactCategory @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Note {
+  id                  String   @id @default(cuid())
+  title               String
+  description         String
+  associated_propertyId String
+  tags                Tag[]    @relation("NoteTags")
+
+  associated_property Property       @relation(fields: [associated_propertyId], references: [id])
+  attachments         NoteAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model NoteAttachment {
+  id      String   @id @default(cuid())
+  name    String
+  file    String
+  file_type String
+  noteId  String
+
+  note Note @relation(fields: [noteId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model EmailSignature {
+  id    String  @id @default(cuid())
+  text  String
+  image String?
+
+  emails Email[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model EmailTemplate {
+  id                      String   @id @default(cuid())
+  recipient_type          String
+  individual_recipient_type String?
+  tenants                 Tenant[] @relation("EmailTemplateTenants")
+  owners                  Owner[]  @relation("EmailTemplateOwners")
+  vendors                 Vendor[] @relation("EmailTemplateVendors")
+  units                   Unit[]   @relation("EmailTemplateUnits")
+  subject                 String
+  body                    String
+  signatureId             String?
+
+  signature EmailSignature? @relation(fields: [signatureId], references: [id])
+  emails    Email[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Email {
+  id                      String   @id @default(cuid())
+  recipient_type          String
+  individual_recipient_type String?
+  tenants                 Tenant[] @relation("EmailTenants")
+  owners                  Owner[]  @relation("EmailOwners")
+  vendors                 Vendor[] @relation("EmailVendors")
+  units                   Unit[]   @relation("EmailUnits")
+  subject                 String
+  body                    String
+  signatureId             String?
+  recipient_emails        String[]
+  templateId              String?
+
+  signature EmailSignature? @relation(fields: [signatureId], references: [id])
+  template  EmailTemplate?  @relation(fields: [templateId], references: [id])
+  attachments EmailAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model EmailAttachment {
+  id      String   @id @default(cuid())
+  name    String
+  file    String
+  file_type String
+  emailId String
+
+  email Email @relation(fields: [emailId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Announcement {
+  id                     String   @id @default(cuid())
+  title                  String
+  body                   String
+  selection              String   @default("SPSU")
+  send_by_email          Boolean
+  display_on_tenant_portal Boolean
+  display_date           DateTime @db.Date
+  expiry_date            DateTime @db.Date
+  properties             Property[] @relation("AnnouncementProperties")
+  units                  Unit[]   @relation("AnnouncementUnits")
+
+  attachments AnnouncementAttachment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model AnnouncementAttachment {
+  id             String   @id @default(cuid())
+  name           String
+  file           String
+  file_type      String
+  announcementId String
+
+  announcement Announcement @relation(fields: [announcementId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model PropertyType {
+  id         String @id @default(cuid())
+  name       String @unique
+  properties Property[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model InventoryItemType {
+  id        String @id @default(cuid())
+  name      String @unique
+  inventory Inventory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Tag {
+  id        String @id @default(cuid())
+  name      String @unique
+  unit      Unit[] @relation("UnitTags")
+  unit_types UnitType[] @relation("UnitTypeTags")
+  notes     Note[] @relation("NoteTags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Label {
+  id          String @id @default(cuid())
+  name        String @unique
+  property_upcoming_activities PropertyUpcomingActivity[]
+  unit_upcoming_activities UnitUpcomingActivity[]
+  owner_upcoming_activities OwnerUpcomingActivity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model InventoryLocation {
+  id        String @id @default(cuid())
+  name      String @unique
+  inventory Inventory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ManagementFee {
+  id                String    @id @default(cuid())
+  fee               Decimal   @db.Decimal(10, 2)
+  fee_type          String
+  previous_fee      Decimal?  @db.Decimal(10, 2)
+  previous_fee_type String?
+  gl_account        String
+  status            String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model BusinessInformation {
+  id                        String   @id @default(cuid())
+  logo                      String
+  name                      String
+  description               String
+  building_or_office_number String
+  street                    String
+  city                      String
+  postal_code               String
+  state                     String
+  country                   String
+  primary_email             String
+  secondary_email           String?
+  phone_number              String
+  telephone_number          String?
+  tax_identity_type         String
+  tax_payer_id              String
+
+  invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model ContactCategory {
+  id       String @id @default(cuid())
+  name     String @unique
+  contacts Contact[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  created_by String?
+  modified_by String?
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
 }

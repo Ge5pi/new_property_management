@@ -1,0 +1,52 @@
+/* chrome and chromium based */
+.react-horizontal-scrolling-menu--scroll-container:not(.scroll-visible)::-webkit-scrollbar {
+  display: none;
+}
+
+.react-horizontal-scrolling-menu--scroll-container:not(.scroll-visible) {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.react-horizontal-scrolling-menu--arrow-left:not(:empty),
+.react-horizontal-scrolling-menu--arrow-right:not(:empty) {
+  align-items: center;
+  margin: 0 5px !important;
+}
+
+.react-horizontal-scrolling-menu--inner-wrapper {
+  align-items: center !important;
+}
+
+.h-scroll-overlap-arrows .react-horizontal-scrolling-menu--inner-wrapper {
+  position: relative !important;
+}
+
+.h-scroll-overlap-arrows .react-horizontal-scrolling-menu--inner-wrapper .react-horizontal-scrolling-menu--arrow-left,
+.h-scroll-overlap-arrows .react-horizontal-scrolling-menu--inner-wrapper .react-horizontal-scrolling-menu--arrow-right {
+  position: absolute !important;
+  transform: translateY(-50%) !important;
+  z-index: 99 !important;
+  top: 50% !important;
+}
+
+.h-scroll-overlap-arrows
+  .react-horizontal-scrolling-menu--inner-wrapper
+  .react-horizontal-scrolling-menu--arrow-left
+  > .btn:not(.disabled),
+.h-scroll-overlap-arrows
+  .react-horizontal-scrolling-menu--inner-wrapper
+  .react-horizontal-scrolling-menu--arrow-right
+  > .btn:not(.disabled) {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.h-scroll-overlap-arrows .react-horizontal-scrolling-menu--inner-wrapper .react-horizontal-scrolling-menu--arrow-left {
+  left: 0 !important;
+}
+
+.h-scroll-overlap-arrows .react-horizontal-scrolling-menu--inner-wrapper .react-horizontal-scrolling-menu--arrow-right {
+  right: 0 !important;
+}

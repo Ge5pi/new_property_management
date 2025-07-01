@@ -1,0 +1,76 @@
+.swal2-show,
+.swal2-hide {
+  animation: none !important;
+}
+
+.swal2-popup {
+  width: 100% !important;
+}
+
+.swal2-close {
+  width: 22px;
+  border: 2px solid #9a9a9a !important;
+  color: #9a9a9a !important;
+  font-size: 1.5em !important;
+  font-weight: bold !important;
+  font-family: 'Satoshi-Bold' !important;
+  box-shadow: none !important;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  border-radius: 3px;
+}
+
+.swal2-popup.swal-size-fullscreen {
+  width: 100vw;
+  max-width: none;
+  height: 100%;
+  margin: 0;
+}
+
+@media (min-width: 992px) {
+  .swal2-popup.swal-size-lg,
+  .swal2-popup.swal-size-xl {
+    max-width: 800px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .swal2-popup.swal-size-xl {
+    max-width: 1140px !important;
+  }
+}
+
+@media (min-width: 576px) {
+  .swal2-popup.swal-size-sm {
+    max-width: 300px !important;
+  }
+
+  .swal2-popup.swal-size-md {
+    max-width: 500px !important;
+    margin: 1.75rem auto;
+  }
+}
+
+.sweet-loading-wrapper {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.75);
+  width: 100%;
+  border: none;
+  height: 100%;
+  border-radius: 0 !important;
+  bottom: 0;
+  animation: none !important;
+  margin: 0 !important;
+  border: none !important;
+}
+div:where(.swal2-container) div:where(.swal2-actions) {
+  z-index: 3;
+}
+
+div:where(.swal2-container) .swal2-html-container {
+  padding: 0 !important;
+}

@@ -1,0 +1,65 @@
+.tags-input-container {
+  padding: 0.5em;
+  border-radius: 3px;
+  background-color: #eeeeee;
+  min-height: 281px;
+  margin-top: 1em;
+  gap: 0.5em;
+}
+
+.tag-item {
+  background: #111111;
+  border: 1px solid #111111;
+  display: inline-flex;
+  align-items: center;
+  margin: 8px 0.25rem;
+  border-radius: 20px;
+
+  min-height: 34px !important;
+  color: #ffffff !important;
+  font-size: 0.875em !important;
+}
+
+.tag-item:has(button) {
+  padding-left: 13px;
+  padding-right: 5px;
+}
+
+.tag-item:not(:has(button)) {
+  padding-left: 13px;
+  padding-right: 13px;
+}
+
+.tag-item .close {
+  height: 20px;
+  width: 20px;
+  background-color: rgb(48, 48, 48);
+  color: #fff;
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0.5em;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.rbt-token .close:hover,
+.rbt-token .close:focus,
+.rbt-token .close:active {
+  color: #fff !important;
+}
+
+.tags-input > .form-control {
+  padding: 0.5em 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  margin-left: 0.5rem !important;
+  border: none !important;
+  outline: none !important;
+  width: auto !important;
+}
+
+.tags-input > .form-control > .rbt-input-wrapper > div:not(.tag-item) {
+  display: inline-flex !important;
+}

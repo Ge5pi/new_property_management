@@ -1,0 +1,64 @@
+.login-bg {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, #fff 100%), url('assets/images/login-background.jpg');
+  background-repeat: no-repeat;
+  background-position: right;
+  background-size: cover;
+}
+
+.login-bg .content {
+  text-align: left;
+  max-width: 700px;
+  padding: 0 1rem 8rem 1rem;
+  color: #000;
+}
+
+@media (max-width: 1440px) {
+  .login-bg .content {
+    max-width: 500px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .login-bg .content {
+    max-width: 100% !important;
+  }
+
+  .login-bg .content h2 {
+    font-size: 2.475rem !important;
+  }
+
+  .login-bg .content p {
+    font-size: 1rem !important;
+  }
+}
+
+.login-bg .content h2 {
+  font-family: 'Satoshi-Black' !important;
+  font-size: 2.75rem;
+}
+
+.login-bg .content p {
+  font-family: 'Satoshi-medium' !important;
+}
+
+.form-title {
+  font-family: 'Satoshi-Bold' !important;
+}
+
+.form-subtitle {
+  font-family: 'Satoshi-Light' !important;
+}
+
+.form-labels {
+  font-family: 'Satoshi-Medium' !important;
+  text-transform: capitalize;
+  text-align: start !important;
+  font-weight: normal;
+}
+
+.btn-login:hover {
+  background-color: #eeeeee;
+  border-color: #eeeeee;
+  color: #111;
+}

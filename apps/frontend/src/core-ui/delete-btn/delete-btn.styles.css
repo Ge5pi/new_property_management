@@ -1,0 +1,22 @@
+.btn-delete {
+  border: none !important;
+  background-color: transparent !important;
+}
+.btn-delete:hover,
+.btn-delete:focus {
+  color: #c90303 !important;
+}
+
+.btn-delete-reset {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: inline-flex;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-delete-reset:hover {
+  background-color: #fc3939 !important;
+}

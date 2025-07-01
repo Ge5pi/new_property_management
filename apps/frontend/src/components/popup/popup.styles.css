@@ -1,0 +1,51 @@
+@media (max-width: 480px) {
+  .popup-wrapper {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .popup-title {
+    padding-left: 0 !important;
+  }
+}
+
+.popup-title {
+  text-align: start !important;
+}
+
+.popup-title h3 {
+  font-family: 'Satoshi-Bold';
+  color: #000000 !important;
+  margin: 0 !important;
+  font-size: 22px;
+}
+
+.popup-title p {
+  color: #000000 !important;
+  margin-bottom: 0 !important;
+  font-size: 16px;
+}
+
+.popup-form-labels {
+  font-family: 'Satoshi-Medium';
+  text-transform: capitalize;
+  color: #1e1e1e !important;
+  font-size: 16px !important;
+}
+
+.rent-group-label {
+  font-family: 'Satoshi-Medium';
+  text-transform: capitalize;
+}
+
+.please-wait-progress-overlay {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  z-index: 9292;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}

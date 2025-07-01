@@ -1,0 +1,11 @@
+.not_allowed {
+  display: flex;
+  min-height: 85vh;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.not_allowed h1 {
+  margin: 40px 0 20px;
+}

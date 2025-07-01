@@ -1,0 +1,37 @@
+.image {
+  opacity: 0.8;
+  width: 80px;
+  height: 80px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.image:hover {
+  opacity: 1;
+}
+
+.radio-img {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+.radio-img > input {
+  display: none;
+}
+
+.radio-img > .image {
+  cursor: pointer;
+  border: 2px solid black;
+}
+
+.radio-img > input:checked + .image {
+  border: 2px solid #3360d4 !important;
+}
+
+.signature-text p {
+  margin: 0 !important;
+  line-height: 1.05rem !important;
+}
