@@ -1,22 +1,29 @@
-import { PrismaClient, User } from '../../generated/prisma';
-import Stripe from 'stripe';
+import { db } from '../database';
+import { Insertable, Updateable, Selectable } from 'kysely';
+import { User } from '../generated/types';
+import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-06-20',
-});
+export async function createUser(userData: Insertable<User>): Promise<Selectable<User>> {
+  const hashedPassword = await bcrypt.hash(userData.password, 10);
+  return await db.$kysely.insertInto('User').values({
+    ...userData,
+    password: hashedPassword,
+  }).returningAll().executeTakeFirstOrThrow();
+}
 
-export const createUser = async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt' | 'stripeCustomerId'>): Promise<User> => {
-  const stripeCustomer = await stripe.customers.create({
-    email: userData.email,
-  });
+export async function findUserById(id: string): Promise<Selectable<User> | undefined> {
+  return await db.$kysely.selectFrom('User').selectAll().where('id', '=', id).executeTakeFirst();
+}
 
-  const user = await prisma.user.create({
-    data: {
-      ...userData,
-      stripeCustomerId: stripeCustomer.id,
-    },
-  });
+export async function findUserByEmail(email: string): Promise<Selectable<User> | undefined> {
+  return await db.$kysely.selectFrom('User').selectAll().where('email', '=', email).executeTakeFirst();
+}
 
-  return user;
-};
+export async function updateUser(id: string, userData: Updateable<User>): Promise<Selectable<User> | undefined> {
+  return await db.$kysely.updateTable('User').set(userData).where('id', '=', id).returningAll().executeTakeFirst();
+}
+
+export async function updatePassword(id: string, newPassword: string): Promise<Selectable<User> | undefined> {
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  return await db.$kysely.updateTable('User').set({ password: hashedPassword }).where('id', '=', id).returningAll().executeTakeFirst();
+}

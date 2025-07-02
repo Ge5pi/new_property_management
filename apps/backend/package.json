@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.ts",
+    "dev": "ts-node src/index.ts",
     "postinstall": "prisma generate",
     "generate-kysely-types": "ts-node src/generate-kysely-types.ts"
   },
@@ -15,7 +15,7 @@
   "packageManager": "pnpm@10.12.4",
   "dependencies": {
     "@new-property-management/shared": "workspace:*",
-    "@prisma/client": "^6.10.1",
+    "@prisma/client": "^6.11.0",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.56.0",
     "dotenv": "^17.0.0",
@@ -23,19 +23,22 @@
     "jsonwebtoken": "^9.0.2",
     "kysely": "^0.28.2",
     "kysely-codegen": "^0.18.5",
-    "prisma": "^6.10.1",
-    "prisma-extension-kysely": "^3.0.0",
+    "prisma-extension-kysely": "^2.0.0",
     "stripe": "^18.2.1",
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.3",
+    "@types/jest": "^27.5.2",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.7",
     "eslint": "^9.30.0",
+    "jest": "^30.0.3",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
+    "prisma": "^6.10.1",
     "prisma-kysely": "^1.8.0",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

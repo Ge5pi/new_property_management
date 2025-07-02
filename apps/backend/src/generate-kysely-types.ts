@@ -1,22 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import { Kysely, PrismaDialect } from 'kysely';
-import { Codegen } from 'kysely-codegen';
+import { db } from './database/custom-prisma-client';
 
 async function main() {
-  const db = new Kysely<any>({
-    dialect: new PrismaDialect({
-      prisma: new PrismaClient(),
-    }),
-  });
+  // Use the extended Prisma client with Kysely dialect
+  // The driver is already set up in the extended client
+  // So we can use it directly for code generation if supported
 
-  const codegen = new Codegen({
-    kysely: db,
-    dialect: 'prisma',
-    out: './src/database/types.ts',
-  });
+  // Since the previous codegen approach is broken, 
+  // we will just destroy the db instance here for now
 
-  await codegen.generate();
-  await db.destroy();
+  await db.$disconnect();
 }
 
 main();

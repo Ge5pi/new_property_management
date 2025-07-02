@@ -72,6 +72,50 @@ export const TaxIdentityChoices = {
     EIN: "EIN"
 } as const;
 export type TaxIdentityChoices = (typeof TaxIdentityChoices)[keyof typeof TaxIdentityChoices];
+export const ChargeType = {
+    PERCENT: "PERCENT",
+    FLAT: "FLAT"
+} as const;
+export type ChargeType = (typeof ChargeType)[keyof typeof ChargeType];
+export const OrderTypeChoices = {
+    INTERNAL: "INTERNAL",
+    RESIDENT: "RESIDENT",
+    UNIT_TURN: "UNIT_TURN"
+} as const;
+export type OrderTypeChoices = (typeof OrderTypeChoices)[keyof typeof OrderTypeChoices];
+export const PriorityChoices = {
+    URGENT: "URGENT",
+    NORMAL: "NORMAL",
+    LOW: "LOW"
+} as const;
+export type PriorityChoices = (typeof PriorityChoices)[keyof typeof PriorityChoices];
+export const CycleChoices = {
+    DAILY: "DAILY",
+    WEEKLY: "WEEKLY",
+    MONTHLY: "MONTHLY",
+    YEARLY: "YEARLY",
+    SIX_MONTHS: "SIX_MONTHS"
+} as const;
+export type CycleChoices = (typeof CycleChoices)[keyof typeof CycleChoices];
+export const StatusChoices = {
+    OPEN: "OPEN",
+    ASSIGNED: "ASSIGNED",
+    UNASSIGNED: "UNASSIGNED",
+    COMPLETED: "COMPLETED",
+    PENDING: "PENDING",
+    IN_PROGRESS: "IN_PROGRESS"
+} as const;
+export type StatusChoices = (typeof StatusChoices)[keyof typeof StatusChoices];
+export const ConditionChoices = {
+    OKAY: "OKAY",
+    NOT_OKAY: "NOT_OKAY"
+} as const;
+export type ConditionChoices = (typeof ConditionChoices)[keyof typeof ConditionChoices];
+export const FixedAssetsStatus = {
+    IN_STORAGE: "IN_STORAGE",
+    INSTALLED: "INSTALLED"
+} as const;
+export type FixedAssetsStatus = (typeof FixedAssetsStatus)[keyof typeof FixedAssetsStatus];
 export type Applicant = {
     id: string;
     first_name: string;
@@ -80,6 +124,66 @@ export type Applicant = {
     allow_email_for_rental_application: Generated<boolean>;
     phone_number: string;
     unit_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type Area = {
+    id: string;
+    name: string;
+    inspection_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type AreaItem = {
+    id: string;
+    name: string;
+    condition: ConditionChoices;
+    area_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type FixedAsset = {
+    id: string;
+    status: FixedAssetsStatus | null;
+    placed_in_service_date: Timestamp | null;
+    warranty_expiration_date: Timestamp | null;
+    unit_id: string;
+    inventory_item_id: string;
+    quantity: number;
+    cost: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type Inspection = {
+    id: string;
+    name: string;
+    date: Timestamp;
+    unit_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type Inventory = {
+    id: string;
+    name: string;
+    item_type_id: string | null;
+    description: string;
+    part_number: string;
+    vendor_id: string | null;
+    quantity: number;
+    expense_account: string;
+    cost: string;
+    location_id: string | null;
+    bin_or_shelf_number: string | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type Labor = {
+    id: string;
+    title: string;
+    date: Timestamp;
+    hours: number;
+    description: string;
+    work_order_id: string;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
@@ -152,6 +256,43 @@ export type OwnerUpcomingActivity = {
     owner_id: string;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
+};
+export type Project = {
+    id: string;
+    name: string;
+    description: string;
+    status: Generated<StatusChoices>;
+    parent_property_id: string;
+    select_all_units: boolean;
+    budget: string;
+    gl_account: string;
+    start_date: Timestamp;
+    end_date: Timestamp | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type ProjectExpense = {
+    id: string;
+    title: string;
+    description: string;
+    amount: string;
+    date: Timestamp;
+    assigned_to_id: string;
+    project_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type ProjectExpenseAttachment = {
+    id: string;
+    name: string;
+    file: string;
+    project_expense_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type ProjectToUnit = {
+    A: string;
+    B: string;
 };
 export type Property = {
     id: string;
@@ -274,6 +415,38 @@ export type PropertyUtilityBilling = {
     owner_contribution_percentage: number;
     tenant_contribution_percentage: number;
     parent_property_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type PurchaseOrder = {
+    id: string;
+    vendor_id: string | null;
+    description: string;
+    required_by_date: Timestamp;
+    tax: string | null;
+    tax_charge_type: ChargeType | null;
+    shipping: string | null;
+    shipping_charge_type: ChargeType | null;
+    discount: string | null;
+    discount_charge_type: ChargeType | null;
+    notes: string | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type PurchaseOrderAttachment = {
+    id: string;
+    name: string;
+    file: string;
+    purchase_order_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type PurchaseOrderItem = {
+    id: string;
+    inventory_item_id: string;
+    cost: string;
+    quantity: number;
+    purchase_order_id: string;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
@@ -438,6 +611,26 @@ export type SecondaryTenant = {
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
+export type ServiceRequest = {
+    id: string;
+    unit_id: string;
+    order_type: OrderTypeChoices;
+    permission_to_enter: Generated<boolean>;
+    additional_information_for_entry: string | null;
+    priority: PriorityChoices;
+    subject: string;
+    description: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
+export type ServiceRequestAttachment = {
+    id: string;
+    name: string;
+    file: string;
+    service_request_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type Tenant = {
     id: string;
     first_name: string;
@@ -586,12 +779,42 @@ export type VendorType = {
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
+export type WorkOrder = {
+    id: string;
+    is_recurring: Generated<boolean>;
+    cycle: CycleChoices | null;
+    status: Generated<StatusChoices>;
+    order_type: OrderTypeChoices;
+    job_description: string | null;
+    vendor_instructions: string | null;
+    vendor_trade: string | null;
+    vendor_type_id: string;
+    vendor_id: string;
+    email_vendor: boolean;
+    request_receipt: boolean;
+    assign_to_id: string | null;
+    owner_approved: boolean;
+    follow_up_date: Timestamp;
+    service_request_id: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type DB = {
+    _ProjectToUnit: ProjectToUnit;
     Applicant: Applicant;
+    Area: Area;
+    AreaItem: AreaItem;
+    FixedAsset: FixedAsset;
+    Inspection: Inspection;
+    Inventory: Inventory;
+    Labor: Labor;
     Lease: Lease;
     LeaseTemplate: LeaseTemplate;
     Owner: Owner;
     OwnerUpcomingActivity: OwnerUpcomingActivity;
+    Project: Project;
+    ProjectExpense: ProjectExpense;
+    ProjectExpenseAttachment: ProjectExpenseAttachment;
     Property: Property;
     PropertyAttachment: PropertyAttachment;
     PropertyLateFeePolicy: PropertyLateFeePolicy;
@@ -601,6 +824,9 @@ export type DB = {
     PropertyPhoto: PropertyPhoto;
     PropertyUpcomingActivity: PropertyUpcomingActivity;
     PropertyUtilityBilling: PropertyUtilityBilling;
+    PurchaseOrder: PurchaseOrder;
+    PurchaseOrderAttachment: PurchaseOrderAttachment;
+    PurchaseOrderItem: PurchaseOrderItem;
     RentableItem: RentableItem;
     RentalApplication: RentalApplication;
     RentalApplicationAdditionalIncome: RentalApplicationAdditionalIncome;
@@ -612,6 +838,8 @@ export type DB = {
     RentalApplicationResidentialHistory: RentalApplicationResidentialHistory;
     RentalApplicationTemplate: RentalApplicationTemplate;
     SecondaryTenant: SecondaryTenant;
+    ServiceRequest: ServiceRequest;
+    ServiceRequestAttachment: ServiceRequestAttachment;
     Tenant: Tenant;
     TenantAttachment: TenantAttachment;
     TenantUpcomingActivity: TenantUpcomingActivity;
@@ -625,4 +853,5 @@ export type DB = {
     VendorAddress: VendorAddress;
     VendorAttachment: VendorAttachment;
     VendorType: VendorType;
+    WorkOrder: WorkOrder;
 };
