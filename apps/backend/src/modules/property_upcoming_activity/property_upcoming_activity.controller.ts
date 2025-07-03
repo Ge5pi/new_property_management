@@ -22,7 +22,13 @@ export async function getAllPropertyUpcomingActivities(req: Request, res: Respon
 export async function createPropertyUpcomingActivity(req: Request, res: Response) {
   try {
     const validatedData = createPropertyUpcomingActivitySchema.parse(req.body);
-    const newPropertyUpcomingActivity = await propertyUpcomingActivityService.createPropertyUpcomingActivity(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+    };
+    const newPropertyUpcomingActivity = await propertyUpcomingActivityService.createPropertyUpcomingActivity(mappedData);
     res.status(201).json(newPropertyUpcomingActivity);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -51,7 +57,11 @@ export async function updatePropertyUpcomingActivity(req: Request, res: Response
   try {
     const { id } = req.params;
     const validatedData = updatePropertyUpcomingActivitySchema.parse(req.body);
-    const updatedPropertyUpcomingActivity = await propertyUpcomingActivityService.updatePropertyUpcomingActivity(id, validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      parent_property_id: validatedData.parentPropertyId,
+    };
+    const updatedPropertyUpcomingActivity = await propertyUpcomingActivityService.updatePropertyUpcomingActivity(id, mappedData);
     if (updatedPropertyUpcomingActivity) {
       res.json(updatedPropertyUpcomingActivity);
     } else {

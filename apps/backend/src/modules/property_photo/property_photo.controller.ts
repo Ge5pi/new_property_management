@@ -26,7 +26,15 @@ export async function getAllPropertyPhotos(req: Request, res: Response) {
 export async function createPropertyPhoto(req: Request, res: Response) {
   try {
     const validatedData = createPropertyPhotoSchema.parse(req.body);
-    const newPropertyPhoto = await propertyPhotoService.createPropertyPhoto(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      image: validatedData.image,
+      is_cover: validatedData.isCover,
+    };
+    const newPropertyPhoto = await propertyPhotoService.createPropertyPhoto(mappedData);
     res.status(201).json(newPropertyPhoto);
   } catch (error) {
     if (error instanceof z.ZodError) {

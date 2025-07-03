@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as userService from '../../services/user.service';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 
 interface AuthenticatedRequest extends Request {
   userId?: string;
@@ -27,9 +28,8 @@ export async function getUserProfile(req: AuthenticatedRequest, res: Response) {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    // Exclude sensitive information like password
-    const { password, ...profile } = user;
-    res.json(profile);
+    // Exclude sensitive information like password - password does not exist on Tenant, so just return user as is
+    res.json(user);
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve user profile' });
   }
@@ -46,8 +46,8 @@ export async function updateUserProfile(req: AuthenticatedRequest, res: Response
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
     }
-    const { password, ...profile } = updatedUser;
-    res.json(profile);
+    // password does not exist on Tenant, so just return updatedUser as is
+    res.json(updatedUser);
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ errors: error.errors });
@@ -65,12 +65,13 @@ export async function updateUserPassword(req: AuthenticatedRequest, res: Respons
     }
     const { oldPassword, newPassword } = updatePasswordSchema.parse(req.body);
 
-    const user = await userService.findUserById(userId);
-    if (!user) {
+    // Fetch user password separately since Tenant type does not include password
+    const userWithPassword = await userService.findUserByIdWithPassword(userId);
+    if (!userWithPassword) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(oldPassword, userWithPassword.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid old password' });
     }

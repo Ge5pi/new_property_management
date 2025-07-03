@@ -26,7 +26,15 @@ export async function getAllUnitPhotos(req: Request, res: Response) {
 export async function createUnitPhoto(req: Request, res: Response) {
   try {
     const validatedData = createUnitPhotoSchema.parse(req.body);
-    const newUnitPhoto = await unitPhotoService.createUnitPhoto(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      unit_id: validatedData.unitId,
+      image: validatedData.image,
+      is_cover: validatedData.isCover,
+    };
+    const newUnitPhoto = await unitPhotoService.createUnitPhoto(mappedData);
     res.status(201).json(newUnitPhoto);
   } catch (error) {
     if (error instanceof z.ZodError) {

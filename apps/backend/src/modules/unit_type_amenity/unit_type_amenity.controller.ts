@@ -24,7 +24,14 @@ export async function getAllUnitTypeAmenities(req: Request, res: Response) {
 export async function createUnitTypeAmenity(req: Request, res: Response) {
   try {
     const validatedData = createUnitTypeAmenitySchema.parse(req.body);
-    const newUnitTypeAmenity = await unitTypeAmenityService.createUnitTypeAmenity(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      unit_type_id: validatedData.unitTypeId,
+      amenity_id: validatedData.amenityId,
+    };
+    const newUnitTypeAmenity = await unitTypeAmenityService.createUnitTypeAmenity(mappedData);
     res.status(201).json(newUnitTypeAmenity);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -53,7 +60,12 @@ export async function updateUnitTypeAmenity(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const validatedData = updateUnitTypeAmenitySchema.parse(req.body);
-    const updatedUnitTypeAmenity = await unitTypeAmenityService.updateUnitTypeAmenity(id, validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      unit_type_id: validatedData.unitTypeId,
+      amenity_id: validatedData.amenityId,
+    };
+    const updatedUnitTypeAmenity = await unitTypeAmenityService.updateUnitTypeAmenity(id, mappedData);
     if (updatedUnitTypeAmenity) {
       res.json(updatedUnitTypeAmenity);
     } else {

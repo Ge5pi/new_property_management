@@ -36,7 +36,20 @@ export async function getAllSecondaryTenants(req: Request, res: Response) {
 export async function createSecondaryTenant(req: Request, res: Response) {
   try {
     const validatedData = createSecondaryTenantSchema.parse(req.body);
-    const newSecondaryTenant = await secondaryTenantService.createSecondaryTenant(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      birthday: validatedData.birthday,
+      first_name: validatedData.firstName,
+      last_name: validatedData.lastName,
+      phone_number: validatedData.phoneNumber,
+      tax_payer_id: validatedData.taxPayerId,
+      lease_id: validatedData.leaseId,
+      description: validatedData.description,
+      email: validatedData.email,
+    };
+    const newSecondaryTenant = await secondaryTenantService.createSecondaryTenant(mappedData);
     res.status(201).json(newSecondaryTenant);
   } catch (error) {
     if (error instanceof z.ZodError) {

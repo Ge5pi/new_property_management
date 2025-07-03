@@ -34,7 +34,19 @@ export async function getAllRentableItems(req: Request, res: Response) {
 export async function createRentableItem(req: Request, res: Response) {
   try {
     const validatedData = createRentableItemSchema.parse(req.body);
-    const newRentableItem = await rentableItemService.createRentableItem(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      name: validatedData.name,
+      status: validatedData.status,
+      tenant_id: validatedData.tenantId,
+      amount: validatedData.amount,
+      gl_account: validatedData.glAccount,
+      description: validatedData.description,
+    };
+    const newRentableItem = await rentableItemService.createRentableItem(mappedData);
     res.status(201).json(newRentableItem);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -63,7 +75,17 @@ export async function updateRentableItem(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const validatedData = updateRentableItemSchema.parse(req.body);
-    const updatedRentableItem = await rentableItemService.updateRentableItem(id, validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      name: validatedData.name,
+      status: validatedData.status,
+      tenant_id: validatedData.tenantId,
+      amount: validatedData.amount,
+      gl_account: validatedData.glAccount,
+      description: validatedData.description,
+      parent_property_id: validatedData.parentPropertyId,
+    };
+    const updatedRentableItem = await rentableItemService.updateRentableItem(id, mappedData);
     if (updatedRentableItem) {
       res.json(updatedRentableItem);
     } else {

@@ -40,7 +40,22 @@ export async function getAllPropertyLateFeePolicies(req: Request, res: Response)
 export async function createPropertyLateFeePolicy(req: Request, res: Response) {
   try {
     const validatedData = createPropertyLateFeePolicySchema.parse(req.body);
-    const newPropertyLateFeePolicy = await propertyLateFeePolicyService.createPropertyLateFeePolicy(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      start_date: validatedData.startDate,
+      end_date: validatedData.endDate,
+      late_fee_type: validatedData.lateFeeType,
+      base_amount_fee: validatedData.baseAmountFee,
+      eligible_charges: validatedData.eligibleCharges,
+      charge_daily_late_fees: validatedData.chargeDailyLateFees,
+      daily_amount_per_month_max: validatedData.dailyAmountPerMonthMax,
+      grace_period_type: validatedData.gracePeriodType,
+      grace_period: validatedData.gracePeriod,
+    };
+    const newPropertyLateFeePolicy = await propertyLateFeePolicyService.createPropertyLateFeePolicy(mappedData);
     res.status(201).json(newPropertyLateFeePolicy);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -69,7 +84,20 @@ export async function updatePropertyLateFeePolicy(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const validatedData = updatePropertyLateFeePolicySchema.parse(req.body);
-    const updatedPropertyLateFeePolicy = await propertyLateFeePolicyService.updatePropertyLateFeePolicy(id, validatedData);
+    // Map camelCase keys to snake_case keys
+    const mappedData = {
+      start_date: validatedData.startDate,
+      end_date: validatedData.endDate,
+      late_fee_type: validatedData.lateFeeType,
+      base_amount_fee: validatedData.baseAmountFee,
+      eligible_charges: validatedData.eligibleCharges,
+      charge_daily_late_fees: validatedData.chargeDailyLateFees,
+      daily_amount_per_month_max: validatedData.dailyAmountPerMonthMax,
+      grace_period_type: validatedData.gracePeriodType,
+      grace_period: validatedData.gracePeriod,
+      parent_property_id: validatedData.parentPropertyId,
+    };
+    const updatedPropertyLateFeePolicy = await propertyLateFeePolicyService.updatePropertyLateFeePolicy(id, mappedData);
     if (updatedPropertyLateFeePolicy) {
       res.json(updatedPropertyLateFeePolicy);
     } else {

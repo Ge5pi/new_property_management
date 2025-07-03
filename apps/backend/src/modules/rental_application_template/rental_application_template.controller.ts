@@ -36,7 +36,20 @@ export async function getAllRentalApplicationTemplates(req: Request, res: Respon
 export async function createRentalApplicationTemplate(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationTemplateSchema.parse(req.body);
-    const newRentalApplicationTemplate = await rentalApplicationTemplateService.createRentalApplicationTemplate(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      general_info: validatedData.generalInfo,
+      personal_details: validatedData.personalDetails,
+      rental_history: validatedData.rentalHistory,
+      financial_info: validatedData.financialInfo,
+      dependents_info: validatedData.dependentsInfo,
+      other_info: validatedData.otherInfo,
+      description: validatedData.description,
+    };
+    const newRentalApplicationTemplate = await rentalApplicationTemplateService.createRentalApplicationTemplate(mappedData);
     res.status(201).json(newRentalApplicationTemplate);
   } catch (error) {
     if (error instanceof z.ZodError) {

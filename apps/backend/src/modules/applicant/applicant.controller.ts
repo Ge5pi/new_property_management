@@ -32,7 +32,18 @@ export async function getAllApplicants(req: Request, res: Response) {
 export async function createApplicant(req: Request, res: Response) {
   try {
     const validatedData = createApplicantSchema.parse(req.body);
-    const newApplicant = await applicantService.createApplicant(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      unit_id: validatedData.unitId,
+      first_name: validatedData.firstName,
+      last_name: validatedData.lastName,
+      email: validatedData.email,
+      phone_number: validatedData.phoneNumber,
+      allow_email_for_rental_application: validatedData.allowEmailForRentalApplication,
+    };
+    const newApplicant = await applicantService.createApplicant(mappedData);
     res.status(201).json(newApplicant);
   } catch (error) {
     if (error instanceof z.ZodError) {

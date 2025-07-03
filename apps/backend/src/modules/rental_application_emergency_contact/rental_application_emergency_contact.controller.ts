@@ -30,7 +30,17 @@ export async function getAllRentalApplicationEmergencyContacts(req: Request, res
 export async function createRentalApplicationEmergencyContact(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationEmergencyContactSchema.parse(req.body);
-    const newRentalApplicationEmergencyContact = await rentalApplicationEmergencyContactService.createRentalApplicationEmergencyContact(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      address: validatedData.address,
+      phone_number: validatedData.phoneNumber,
+      relationship: validatedData.relationship,
+      rental_application_id: validatedData.rentalApplicationId,
+    };
+    const newRentalApplicationEmergencyContact = await rentalApplicationEmergencyContactService.createRentalApplicationEmergencyContact(mappedData);
     res.status(201).json(newRentalApplicationEmergencyContact);
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -36,7 +36,20 @@ export async function getAllLeaseTemplates(req: Request, res: Response) {
 export async function createLeaseTemplate(req: Request, res: Response) {
   try {
     const validatedData = createLeaseTemplateSchema.parse(req.body);
-    const newLeaseTemplate = await leaseTemplateService.createLeaseTemplate(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      right_of_inspection: validatedData.rightOfInspection,
+      description: validatedData.description,
+      rules_and_policies: validatedData.rulesAndPolicies,
+      condition_of_premises: validatedData.conditionOfPremises,
+      conditions_of_moving_out: validatedData.conditionsOfMovingOut,
+      releasing_policies: validatedData.releasingPolicies,
+      final_statement: validatedData.finalStatement,
+    };
+    const newLeaseTemplate = await leaseTemplateService.createLeaseTemplate(mappedData);
     res.status(201).json(newLeaseTemplate);
   } catch (error) {
     if (error instanceof z.ZodError) {

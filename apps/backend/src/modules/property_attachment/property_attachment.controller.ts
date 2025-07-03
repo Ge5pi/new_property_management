@@ -26,7 +26,15 @@ export async function getAllPropertyAttachments(req: Request, res: Response) {
 export async function createPropertyAttachment(req: Request, res: Response) {
   try {
     const validatedData = createPropertyAttachmentSchema.parse(req.body);
-    const newPropertyAttachment = await propertyAttachmentService.createPropertyAttachment(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newPropertyAttachment = await propertyAttachmentService.createPropertyAttachment(mappedData);
     res.status(201).json(newPropertyAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

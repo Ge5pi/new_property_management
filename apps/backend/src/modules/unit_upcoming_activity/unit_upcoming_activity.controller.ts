@@ -22,7 +22,13 @@ export async function getAllUnitUpcomingActivities(req: Request, res: Response) 
 export async function createUnitUpcomingActivity(req: Request, res: Response) {
   try {
     const validatedData = createUnitUpcomingActivitySchema.parse(req.body);
-    const newUnitUpcomingActivity = await unitUpcomingActivityService.createUnitUpcomingActivity(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      unit_id: validatedData.unitId,
+    };
+    const newUnitUpcomingActivity = await unitUpcomingActivityService.createUnitUpcomingActivity(mappedData);
     res.status(201).json(newUnitUpcomingActivity);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -51,7 +57,11 @@ export async function updateUnitUpcomingActivity(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const validatedData = updateUnitUpcomingActivitySchema.parse(req.body);
-    const updatedUnitUpcomingActivity = await unitUpcomingActivityService.updateUnitUpcomingActivity(id, validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      unit_id: validatedData.unitId,
+    };
+    const updatedUnitUpcomingActivity = await unitUpcomingActivityService.updateUnitUpcomingActivity(id, mappedData);
     if (updatedUnitUpcomingActivity) {
       res.json(updatedUnitUpcomingActivity);
     } else {

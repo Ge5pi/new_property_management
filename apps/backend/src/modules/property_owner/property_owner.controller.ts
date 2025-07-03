@@ -36,7 +36,20 @@ export async function getAllPropertyOwners(req: Request, res: Response) {
 export async function createPropertyOwner(req: Request, res: Response) {
   try {
     const validatedData = createPropertyOwnerSchema.parse(req.body);
-    const newPropertyOwner = await propertyOwnerService.createPropertyOwner(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      percentage_owned: validatedData.percentageOwned,
+      payment_type: validatedData.paymentType,
+      contract_expiry: validatedData.contractExpiry,
+      reserve_funds: validatedData.reserveFunds,
+      fiscal_year_end: validatedData.fiscalYearEnd,
+      ownership_start_date: validatedData.ownershipStartDate,
+      owner_id: validatedData.ownerId,
+    };
+    const newPropertyOwner = await propertyOwnerService.createPropertyOwner(mappedData);
     res.status(201).json(newPropertyOwner);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -65,7 +78,18 @@ export async function updatePropertyOwner(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const validatedData = updatePropertyOwnerSchema.parse(req.body);
-    const updatedPropertyOwner = await propertyOwnerService.updatePropertyOwner(id, validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      percentage_owned: validatedData.percentageOwned,
+      parent_property_id: validatedData.parentPropertyId,
+      payment_type: validatedData.paymentType,
+      contract_expiry: validatedData.contractExpiry,
+      reserve_funds: validatedData.reserveFunds,
+      fiscal_year_end: validatedData.fiscalYearEnd,
+      ownership_start_date: validatedData.ownershipStartDate,
+      owner_id: validatedData.ownerId,
+    };
+    const updatedPropertyOwner = await propertyOwnerService.updatePropertyOwner(id, mappedData);
     if (updatedPropertyOwner) {
       res.json(updatedPropertyOwner);
     } else {

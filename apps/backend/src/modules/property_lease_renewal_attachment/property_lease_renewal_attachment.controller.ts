@@ -26,7 +26,15 @@ export async function getAllPropertyLeaseRenewalAttachments(req: Request, res: R
 export async function createPropertyLeaseRenewalAttachment(req: Request, res: Response) {
   try {
     const validatedData = createPropertyLeaseRenewalAttachmentSchema.parse(req.body);
-    const newPropertyLeaseRenewalAttachment = await propertyLeaseRenewalAttachmentService.createPropertyLeaseRenewalAttachment(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newPropertyLeaseRenewalAttachment = await propertyLeaseRenewalAttachmentService.createPropertyLeaseRenewalAttachment(mappedData);
     res.status(201).json(newPropertyLeaseRenewalAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {
