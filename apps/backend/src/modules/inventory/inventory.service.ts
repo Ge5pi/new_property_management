@@ -6,7 +6,7 @@ export async function findAllInventory() {
   return await db.$kysely.selectFrom('Inventory').selectAll().execute();
 }
 
-export async function createInventory(inventoryData: Insertable<Inventory>) {
+export async function createInventory(inventoryData: any) {
   return await db.$kysely.insertInto('Inventory').values(inventoryData).returningAll().executeTakeFirstOrThrow();
 }
 
@@ -14,7 +14,7 @@ export async function findInventoryById(id: string) {
   return await db.$kysely.selectFrom('Inventory').selectAll().where('id', '=', id).executeTakeFirst();
 }
 
-export async function updateInventory(id: string, inventoryData: Updateable<Inventory>) {
+export async function updateInventory(id: string, inventoryData: any) {
   return await db.$kysely.updateTable('Inventory').set(inventoryData).where('id', '=', id).returningAll().executeTakeFirst();
 }
 

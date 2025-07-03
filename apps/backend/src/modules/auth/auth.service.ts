@@ -10,7 +10,7 @@ export type User = {
   updatedAt: Date;
 };
 
-export async function registerUser(userData: Insertable<User>): Promise<Selectable<User>> {
+export async function registerUser(userData: any): Promise<Selectable<User>> {
   const hashedPassword = await bcrypt.hash(userData.password, 10);
   return await db.$kysely.insertInto('User').values({
     ...userData,

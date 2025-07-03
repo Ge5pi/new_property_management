@@ -17,6 +17,7 @@
     "concurrently": "^9.2.0"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "kysely": "^0.26.3"
   }
 }

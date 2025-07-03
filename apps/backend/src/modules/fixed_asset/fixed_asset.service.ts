@@ -6,7 +6,7 @@ export async function findAllFixedAssets() {
   return await db.$kysely.selectFrom('FixedAsset').selectAll().execute();
 }
 
-export async function createFixedAsset(fixedAssetData: Insertable<FixedAsset>) {
+export async function createFixedAsset(fixedAssetData: any) {
   return await db.$kysely.insertInto('FixedAsset').values(fixedAssetData).returningAll().executeTakeFirstOrThrow();
 }
 
@@ -14,7 +14,7 @@ export async function findFixedAssetById(id: string) {
   return await db.$kysely.selectFrom('FixedAsset').selectAll().where('id', '=', id).executeTakeFirst();
 }
 
-export async function updateFixedAsset(id: string, fixedAssetData: Updateable<FixedAsset>) {
+export async function updateFixedAsset(id: string, fixedAssetData: any) {
   return await db.$kysely.updateTable('FixedAsset').set(fixedAssetData).where('id', '=', id).returningAll().executeTakeFirst();
 }
 

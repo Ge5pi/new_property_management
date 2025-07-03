@@ -1,14 +1,31 @@
-import { db } from './database/custom-prisma-client';
+import { Codegen, PostgresDialect } from 'kysely-codegen';
+import { Pool } from 'pg';
+import * as dotenv from 'dotenv';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+
+dotenv.config();
 
 async function main() {
-  // Use the extended Prisma client with Kysely dialect
-  // The driver is already set up in the extended client
-  // So we can use it directly for code generation if supported
+  const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
 
-  // Since the previous codegen approach is broken, 
-  // we will just destroy the db instance here for now
+  const dialect = new PostgresDialect({
+    pool: db,
+  });
 
-  await db.$disconnect();
+  const codegen = new Codegen({
+    dialect,
+    // outFile: path.join(__dirname, '../prisma/generated/types.ts'),
+    outFile: path.join(__dirname, './generated/types.ts'),
+  });
+
+  const result = await codegen.generate();
+
+  await fs.writeFile(result.outFile, result.code);
+
+  await db.end();
 }
 
 main();

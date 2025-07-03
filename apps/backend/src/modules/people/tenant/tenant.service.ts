@@ -6,7 +6,7 @@ export async function findAllTenants() {
   return await db.$kysely.selectFrom('Tenant').selectAll().execute();
 }
 
-export async function createTenant(tenantData: Insertable<Tenant>) {
+export async function createTenant(tenantData: any) {
   return await db.$kysely.insertInto('Tenant').values(tenantData).returningAll().executeTakeFirstOrThrow();
 }
 

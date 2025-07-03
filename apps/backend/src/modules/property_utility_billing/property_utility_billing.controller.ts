@@ -34,7 +34,19 @@ export async function getAllPropertyUtilityBillings(req: Request, res: Response)
 export async function createPropertyUtilityBilling(req: Request, res: Response) {
   try {
     const validatedData = createPropertyUtilityBillingSchema.parse(req.body);
-    const newPropertyUtilityBilling = await propertyUtilityBillingService.createPropertyUtilityBilling(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      parent_property_id: validatedData.parentPropertyId,
+      utility: validatedData.utility,
+      owner_contribution_percentage: validatedData.ownerContributionPercentage,
+      tenant_charge_gl: validatedData.tenantChargeGl,
+      tenant_contribution_percentage: validatedData.tenantContributionPercentage,
+      vendor_bill_gl: validatedData.vendorBillGl,
+      vendor_id: validatedData.vendorId,
+    };
+    const newPropertyUtilityBilling = await propertyUtilityBillingService.createPropertyUtilityBilling(mappedData);
     res.status(201).json(newPropertyUtilityBilling);
   } catch (error) {
     if (error instanceof z.ZodError) {

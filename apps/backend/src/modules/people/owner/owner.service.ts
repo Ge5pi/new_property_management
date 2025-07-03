@@ -6,7 +6,7 @@ export async function findAllOwners() {
   return await db.$kysely.selectFrom('Owner').selectAll().execute();
 }
 
-export async function createOwner(ownerData: Insertable<Owner>) {
+export async function createOwner(ownerData: any) {
   return await db.$kysely.insertInto('Owner').values(ownerData).returningAll().executeTakeFirstOrThrow();
 }
 
@@ -14,7 +14,7 @@ export async function findOwnerById(id: string) {
   return await db.$kysely.selectFrom('Owner').selectAll().where('id', '=', id).executeTakeFirst();
 }
 
-export async function updateOwner(id: string, ownerData: Updateable<Owner>) {
+export async function updateOwner(id: string, ownerData: any) {
   return await db.$kysely.updateTable('Owner').set(ownerData).where('id', '=', id).returningAll().executeTakeFirst();
 }
 

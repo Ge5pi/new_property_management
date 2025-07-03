@@ -3,17 +3,12 @@ import * as rentalApplicationService from './rental_application.service';
 import { z } from 'zod';
 
 const createRentalApplicationSchema = z.object({
-  unitId: z.string().uuid(),
-  applicantId: z.string().uuid(),
-  status: z.enum(['pending', 'approved', 'rejected']),
-  applicationDate: z.string().datetime(),
+  applicant_id: z.string().uuid(),
+  status: z.enum(['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ON_HOLD_OR_WAITING']).optional(),
 });
 
 const updateRentalApplicationSchema = z.object({
-  unitId: z.string().uuid().optional(),
-  applicantId: z.string().uuid().optional(),
-  status: z.enum(['pending', 'approved', 'rejected']).optional(),
-  applicationDate: z.string().datetime().optional(),
+  status: z.enum(['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ON_HOLD_OR_WAITING']).optional(),
 });
 
 export async function getAllRentalApplications(req: Request, res: Response) {

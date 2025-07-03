@@ -6,7 +6,7 @@ export async function findAllRentalApplications() {
   return await db.$kysely.selectFrom('RentalApplication').selectAll().execute();
 }
 
-export async function createRentalApplication(rentalApplicationData: Insertable<RentalApplication>) {
+export async function createRentalApplication(rentalApplicationData: any) {
   return await db.$kysely.insertInto('RentalApplication').values(rentalApplicationData).returningAll().executeTakeFirstOrThrow();
 }
 
