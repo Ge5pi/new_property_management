@@ -30,7 +30,16 @@ export async function getAllRentalApplicationFinancialInformation(req: Request, 
 export async function createRentalApplicationFinancialInformation(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationFinancialInformationSchema.parse(req.body);
-    const newRentalApplicationFinancialInformation = await rentalApplicationFinancialInformationService.createRentalApplicationFinancialInformation(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      rental_application_id: validatedData.rentalApplicationId,
+      name: validatedData.name,
+      account_type: validatedData.accountType,
+      bank: validatedData.bank,
+      account_number: validatedData.accountNumber,
+    };
+    const newRentalApplicationFinancialInformation = await rentalApplicationFinancialInformationService.createRentalApplicationFinancialInformation(mappedData);
     res.status(201).json(newRentalApplicationFinancialInformation);
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -26,7 +26,14 @@ export async function getAllRentalApplicationAdditionalIncome(req: Request, res:
 export async function createRentalApplicationAdditionalIncome(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationAdditionalIncomeSchema.parse(req.body);
-    const newRentalApplicationAdditionalIncome = await rentalApplicationAdditionalIncomeService.createRentalApplicationAdditionalIncome(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      rental_application_id: validatedData.rentalApplicationId,
+      monthly_income: validatedData.monthlyIncome,
+      source_of_income: validatedData.sourceOfIncome,
+    };
+    const newRentalApplicationAdditionalIncome = await rentalApplicationAdditionalIncomeService.createRentalApplicationAdditionalIncome(mappedData);
     res.status(201).json(newRentalApplicationAdditionalIncome);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -55,7 +62,12 @@ export async function updateRentalApplicationAdditionalIncome(req: Request, res:
   try {
     const { id } = req.params;
     const validatedData = updateRentalApplicationAdditionalIncomeSchema.parse(req.body);
-    const updatedRentalApplicationAdditionalIncome = await rentalApplicationAdditionalIncomeService.updateRentalApplicationAdditionalIncome(id, validatedData);
+    const mappedData = {
+      rental_application_id: validatedData.rentalApplicationId,
+      monthly_income: validatedData.monthlyIncome,
+      source_of_income: validatedData.sourceOfIncome,
+    };
+    const updatedRentalApplicationAdditionalIncome = await rentalApplicationAdditionalIncomeService.updateRentalApplicationAdditionalIncome(id, mappedData);
     if (updatedRentalApplicationAdditionalIncome) {
       res.json(updatedRentalApplicationAdditionalIncome);
     } else {

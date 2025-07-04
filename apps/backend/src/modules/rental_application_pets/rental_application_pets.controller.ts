@@ -30,7 +30,16 @@ export async function getAllRentalApplicationPets(req: Request, res: Response) {
 export async function createRentalApplicationPets(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationPetsSchema.parse(req.body);
-    const newRentalApplicationPets = await rentalApplicationPetsService.createRentalApplicationPets(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      rental_application_id: validatedData.rentalApplicationId,
+      name: validatedData.name,
+      pet_type: validatedData.petType,
+      weight: validatedData.weight,
+      age: validatedData.age,
+    };
+    const newRentalApplicationPets = await rentalApplicationPetsService.createRentalApplicationPets(mappedData);
     res.status(201).json(newRentalApplicationPets);
   } catch (error) {
     if (error instanceof z.ZodError) {

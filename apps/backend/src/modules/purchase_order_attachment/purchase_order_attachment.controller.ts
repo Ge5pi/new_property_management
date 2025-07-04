@@ -26,7 +26,14 @@ export async function getAllPurchaseOrderAttachments(req: Request, res: Response
 export async function createPurchaseOrderAttachment(req: Request, res: Response) {
   try {
     const validatedData = createPurchaseOrderAttachmentSchema.parse(req.body);
-    const newPurchaseOrderAttachment = await purchaseOrderAttachmentService.createPurchaseOrderAttachment(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      purchase_order_id: validatedData.purchaseOrderId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newPurchaseOrderAttachment = await purchaseOrderAttachmentService.createPurchaseOrderAttachment(mappedData);
     res.status(201).json(newPurchaseOrderAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

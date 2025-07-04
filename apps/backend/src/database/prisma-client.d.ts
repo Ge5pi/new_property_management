@@ -7,3 +7,10 @@ declare module '@prisma/client' {
     $kysely: Kysely<DB>;
   }
 }
+
+// Workaround: add a global declaration to help TypeScript recognize $kysely on PrismaClient instances
+declare global {
+  interface PrismaClient {
+    $kysely: Kysely<DB>;
+  }
+}

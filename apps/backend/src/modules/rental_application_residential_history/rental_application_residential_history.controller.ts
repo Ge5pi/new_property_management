@@ -17,6 +17,14 @@ const createRentalApplicationResidentialHistorySchema = z.object({
   monthlyRent: z.number().positive().optional(),
   currentState: z.string().optional(),
   rentalApplicationId: z.string().uuid(),
+
+  previousAddress: z.string().optional(),
+  previousAddress2: z.string().optional(),
+  previousCity: z.string().optional(),
+  previousState: z.string().optional(),
+  previousZipCode: z.string().optional(),
+  previousCountry: z.string().optional(),
+  previousResidentTo: z.string().datetime().optional(),
 });
 
 const updateRentalApplicationResidentialHistorySchema = z.object({
@@ -34,6 +42,14 @@ const updateRentalApplicationResidentialHistorySchema = z.object({
   monthlyRent: z.number().positive().optional(),
   currentState: z.string().optional(),
   rentalApplicationId: z.string().uuid().optional(),
+
+  previousAddress: z.string().optional(),
+  previousAddress2: z.string().optional(),
+  previousCity: z.string().optional(),
+  previousState: z.string().optional(),
+  previousZipCode: z.string().optional(),
+  previousCountry: z.string().optional(),
+  previousResidentTo: z.string().datetime().optional(),
 });
 
 export async function getAllRentalApplicationResidentialHistories(req: Request, res: Response) {
@@ -48,7 +64,27 @@ export async function getAllRentalApplicationResidentialHistories(req: Request, 
 export async function createRentalApplicationResidentialHistory(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationResidentialHistorySchema.parse(req.body);
-    const newRentalApplicationResidentialHistory = await rentalApplicationResidentialHistoryService.createRentalApplicationResidentialHistory(validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      rental_application_id: validatedData.rentalApplicationId,
+      current_address: validatedData.currentAddress,
+      current_address_2: validatedData.currentAddress2,
+      current_city: validatedData.currentCity,
+      current_state: validatedData.currentState,
+      current_zip_code: validatedData.currentZipCode,
+      current_country: validatedData.currentCountry,
+      resident_to: validatedData.residentTo,
+      previous_address: validatedData.previousAddress,
+      previous_address_2: validatedData.previousAddress2,
+      previous_city: validatedData.previousCity,
+      previous_state: validatedData.previousState,
+      previous_zip_code: validatedData.previousZipCode,
+      previous_country: validatedData.previousCountry,
+      previous_resident_to: validatedData.previousResidentTo,
+    };
+    const newRentalApplicationResidentialHistory = await rentalApplicationResidentialHistoryService.createRentalApplicationResidentialHistory(mappedData);
     res.status(201).json(newRentalApplicationResidentialHistory);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -77,7 +113,25 @@ export async function updateRentalApplicationResidentialHistory(req: Request, re
   try {
     const { id } = req.params;
     const validatedData = updateRentalApplicationResidentialHistorySchema.parse(req.body);
-    const updatedRentalApplicationResidentialHistory = await rentalApplicationResidentialHistoryService.updateRentalApplicationResidentialHistory(id, validatedData);
+    // Map camelCase keys to snake_case keys and add missing required fields
+    const mappedData = {
+      rental_application_id: validatedData.rentalApplicationId,
+      current_address: validatedData.currentAddress,
+      current_address_2: validatedData.currentAddress2,
+      current_city: validatedData.currentCity,
+      current_state: validatedData.currentState,
+      current_zip_code: validatedData.currentZipCode,
+      current_country: validatedData.currentCountry,
+      resident_to: validatedData.residentTo,
+      previous_address: validatedData.previousAddress,
+      previous_address_2: validatedData.previousAddress2,
+      previous_city: validatedData.previousCity,
+      previous_state: validatedData.previousState,
+      previous_zip_code: validatedData.previousZipCode,
+      previous_country: validatedData.previousCountry,
+      previous_resident_to: validatedData.previousResidentTo,
+    };
+    const updatedRentalApplicationResidentialHistory = await rentalApplicationResidentialHistoryService.updateRentalApplicationResidentialHistory(id, mappedData);
     if (updatedRentalApplicationResidentialHistory) {
       res.json(updatedRentalApplicationResidentialHistory);
     } else {

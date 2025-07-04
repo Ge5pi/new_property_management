@@ -28,7 +28,15 @@ export async function getAllPurchaseOrderItems(req: Request, res: Response) {
 export async function createPurchaseOrderItem(req: Request, res: Response) {
   try {
     const validatedData = createPurchaseOrderItemSchema.parse(req.body);
-    const newPurchaseOrderItem = await purchaseOrderItemService.createPurchaseOrderItem(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      quantity: validatedData.quantity,
+      cost: validatedData.cost,
+      inventory_item_id: validatedData.inventoryItemId,
+      purchase_order_id: validatedData.purchaseOrderId,
+    };
+    const newPurchaseOrderItem = await purchaseOrderItemService.createPurchaseOrderItem(mappedData);
     res.status(201).json(newPurchaseOrderItem);
   } catch (error) {
     if (error instanceof z.ZodError) {

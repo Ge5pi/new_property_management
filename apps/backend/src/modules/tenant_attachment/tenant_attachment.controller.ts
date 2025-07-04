@@ -26,7 +26,14 @@ export async function getAllTenantAttachments(req: Request, res: Response) {
 export async function createTenantAttachment(req: Request, res: Response) {
   try {
     const validatedData = createTenantAttachmentSchema.parse(req.body);
-    const newTenantAttachment = await tenantAttachmentService.createTenantAttachment(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      tenant_id: validatedData.tenantId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newTenantAttachment = await tenantAttachmentService.createTenantAttachment(mappedData);
     res.status(201).json(newTenantAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

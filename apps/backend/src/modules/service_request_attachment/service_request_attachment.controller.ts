@@ -26,7 +26,14 @@ export async function getAllServiceRequestAttachments(req: Request, res: Respons
 export async function createServiceRequestAttachment(req: Request, res: Response) {
   try {
     const validatedData = createServiceRequestAttachmentSchema.parse(req.body);
-    const newServiceRequestAttachment = await serviceRequestAttachmentService.createServiceRequestAttachment(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      service_request_id: validatedData.serviceRequestId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newServiceRequestAttachment = await serviceRequestAttachmentService.createServiceRequestAttachment(mappedData);
     res.status(201).json(newServiceRequestAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

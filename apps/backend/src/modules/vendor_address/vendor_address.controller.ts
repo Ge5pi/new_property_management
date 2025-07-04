@@ -32,7 +32,17 @@ export async function getAllVendorAddresses(req: Request, res: Response) {
 export async function createVendorAddress(req: Request, res: Response) {
   try {
     const validatedData = createVendorAddressSchema.parse(req.body);
-    const newVendorAddress = await vendorAddressService.createVendorAddress(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      vendor_id: validatedData.vendorId,
+      street_address: validatedData.streetAddress,
+      city: validatedData.city,
+      state: validatedData.state,
+      country: validatedData.country,
+      zip: validatedData.zip,
+    };
+    const newVendorAddress = await vendorAddressService.createVendorAddress(mappedData);
     res.status(201).json(newVendorAddress);
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -30,7 +30,16 @@ export async function getAllRentalApplicationDependents(req: Request, res: Respo
 export async function createRentalApplicationDependent(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationDependentSchema.parse(req.body);
-    const newRentalApplicationDependent = await rentalApplicationDependentService.createRentalApplicationDependent(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      rental_application_id: validatedData.rentalApplicationId,
+      first_name: validatedData.firstName,
+      last_name: validatedData.lastName,
+      birthday: validatedData.birthday,
+      relationship: validatedData.relationship,
+    };
+    const newRentalApplicationDependent = await rentalApplicationDependentService.createRentalApplicationDependent(mappedData);
     res.status(201).json(newRentalApplicationDependent);
   } catch (error) {
     if (error instanceof z.ZodError) {

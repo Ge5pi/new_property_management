@@ -26,7 +26,14 @@ export async function getAllAreaItems(req: Request, res: Response) {
 export async function createAreaItem(req: Request, res: Response) {
   try {
     const validatedData = createAreaItemSchema.parse(req.body);
-    const newAreaItem = await areaItemService.createAreaItem(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      condition: validatedData.condition,
+      area_id: validatedData.areaId,
+    };
+    const newAreaItem = await areaItemService.createAreaItem(mappedData);
     res.status(201).json(newAreaItem);
   } catch (error) {
     if (error instanceof z.ZodError) {

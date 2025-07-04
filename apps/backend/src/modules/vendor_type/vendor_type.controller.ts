@@ -24,7 +24,13 @@ export async function getAllVendorTypes(req: Request, res: Response) {
 export async function createVendorType(req: Request, res: Response) {
   try {
     const validatedData = createVendorTypeSchema.parse(req.body);
-    const newVendorType = await vendorTypeService.createVendorType(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      description: validatedData.description,
+    };
+    const newVendorType = await vendorTypeService.createVendorType(mappedData);
     res.status(201).json(newVendorType);
   } catch (error) {
     if (error instanceof z.ZodError) {

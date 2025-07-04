@@ -38,7 +38,20 @@ export async function getAllProjects(req: Request, res: Response) {
 export async function createProject(req: Request, res: Response) {
   try {
     const validatedData = createProjectSchema.parse(req.body);
-    const newProject = await projectService.createProject(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      status: validatedData.status,
+      description: validatedData.description,
+      parent_property_id: validatedData.parentPropertyId,
+      select_all_units: validatedData.selectAllUnits,
+      budget: validatedData.budget,
+      gl_account: validatedData.glAccount,
+      start_date: validatedData.startDate,
+      end_date: validatedData.endDate,
+    };
+    const newProject = await projectService.createProject(mappedData);
     res.status(201).json(newProject);
   } catch (error) {
     if (error instanceof z.ZodError) {

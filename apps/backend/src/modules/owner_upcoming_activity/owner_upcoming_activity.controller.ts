@@ -22,7 +22,12 @@ export async function getAllOwnerUpcomingActivities(req: Request, res: Response)
 export async function createOwnerUpcomingActivity(req: Request, res: Response) {
   try {
     const validatedData = createOwnerUpcomingActivitySchema.parse(req.body);
-    const newOwnerUpcomingActivity = await ownerUpcomingActivityService.createOwnerUpcomingActivity(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      owner_id: validatedData.ownerId,
+    };
+    const newOwnerUpcomingActivity = await ownerUpcomingActivityService.createOwnerUpcomingActivity(mappedData);
     res.status(201).json(newOwnerUpcomingActivity);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -51,7 +56,10 @@ export async function updateOwnerUpcomingActivity(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const validatedData = updateOwnerUpcomingActivitySchema.parse(req.body);
-    const updatedOwnerUpcomingActivity = await ownerUpcomingActivityService.updateOwnerUpcomingActivity(id, validatedData);
+    const mappedData = {
+      owner_id: validatedData.ownerId,
+    };
+    const updatedOwnerUpcomingActivity = await ownerUpcomingActivityService.updateOwnerUpcomingActivity(id, mappedData);
     if (updatedOwnerUpcomingActivity) {
       res.json(updatedOwnerUpcomingActivity);
     } else {

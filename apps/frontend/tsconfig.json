@@ -17,6 +17,23 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "paths": {
+      "components/*": ["components/*"],
+      "core-ui/*": ["core-ui/*"],
+      "hooks/*": ["hooks/*"],
+      "pages/*": ["pages/*"],
+      "routes/*": ["routes/*"],
+      "services/*": ["services/*"],
+      "store/*": ["store/*"],
+      "utils/*": ["utils/*"],
+      "interfaces/*": ["interfaces/*"],
+      "constants/*": ["constants/*"],
+      "context/*": ["context/*"],
+      "api/*": ["api/*"],
+      "data/*": ["data/*"],
+      "config/*": ["config/*"],
+      "validations/*": ["validations/*"],
+      "layout-container/*": ["components/layouts/layout-container/*"],
+      "assets/*": ["assets/*"],
       "@src/*": ["./src/*"]
     }
   },

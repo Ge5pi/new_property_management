@@ -26,7 +26,14 @@ export async function getAllVendorAttachments(req: Request, res: Response) {
 export async function createVendorAttachment(req: Request, res: Response) {
   try {
     const validatedData = createVendorAttachmentSchema.parse(req.body);
-    const newVendorAttachment = await vendorAttachmentService.createVendorAttachment(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      vendor_id: validatedData.vendorId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newVendorAttachment = await vendorAttachmentService.createVendorAttachment(mappedData);
     res.status(201).json(newVendorAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -32,7 +32,17 @@ export async function getAllProjectExpenses(req: Request, res: Response) {
 export async function createProjectExpense(req: Request, res: Response) {
   try {
     const validatedData = createProjectExpenseSchema.parse(req.body);
-    const newProjectExpense = await projectExpenseService.createProjectExpense(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      description: validatedData.description,
+      amount: validatedData.amount,
+      date: validatedData.date,
+      title: validatedData.title,
+      assigned_to_id: validatedData.assignedToId,
+      project_id: validatedData.projectId,
+    };
+    const newProjectExpense = await projectExpenseService.createProjectExpense(mappedData);
     res.status(201).json(newProjectExpense);
   } catch (error) {
     if (error instanceof z.ZodError) {

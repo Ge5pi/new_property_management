@@ -26,7 +26,14 @@ export async function getAllProjectExpenseAttachments(req: Request, res: Respons
 export async function createProjectExpenseAttachment(req: Request, res: Response) {
   try {
     const validatedData = createProjectExpenseAttachmentSchema.parse(req.body);
-    const newProjectExpenseAttachment = await projectExpenseAttachmentService.createProjectExpenseAttachment(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      name: validatedData.name,
+      file: validatedData.file,
+      project_expense_id: validatedData.projectExpenseId,
+    };
+    const newProjectExpenseAttachment = await projectExpenseAttachmentService.createProjectExpenseAttachment(mappedData);
     res.status(201).json(newProjectExpenseAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

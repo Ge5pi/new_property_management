@@ -26,7 +26,14 @@ export async function getAllRentalApplicationAttachments(req: Request, res: Resp
 export async function createRentalApplicationAttachment(req: Request, res: Response) {
   try {
     const validatedData = createRentalApplicationAttachmentSchema.parse(req.body);
-    const newRentalApplicationAttachment = await rentalApplicationAttachmentService.createRentalApplicationAttachment(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      rental_application_id: validatedData.rentalApplicationId,
+      name: validatedData.name,
+      file: validatedData.file,
+    };
+    const newRentalApplicationAttachment = await rentalApplicationAttachmentService.createRentalApplicationAttachment(mappedData);
     res.status(201).json(newRentalApplicationAttachment);
   } catch (error) {
     if (error instanceof z.ZodError) {

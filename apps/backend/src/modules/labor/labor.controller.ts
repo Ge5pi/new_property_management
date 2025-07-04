@@ -30,7 +30,16 @@ export async function getAllLabors(req: Request, res: Response) {
 export async function createLabor(req: Request, res: Response) {
   try {
     const validatedData = createLaborSchema.parse(req.body);
-    const newLabor = await laborService.createLabor(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      description: validatedData.description,
+      hours: validatedData.hours,
+      date: validatedData.date,
+      title: validatedData.title,
+      work_order_id: validatedData.workOrderId,
+    };
+    const newLabor = await laborService.createLabor(mappedData);
     res.status(201).json(newLabor);
   } catch (error) {
     if (error instanceof z.ZodError) {

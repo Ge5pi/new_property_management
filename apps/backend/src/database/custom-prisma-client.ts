@@ -1,8 +1,7 @@
-// custom-prisma-client.ts
 import type { PrismaClient } from '@prisma/client';
 import { Kysely, PostgresDialect } from 'kysely';
 import type { DB } from '../../prisma/generated/types';
-import KyselyExtension from 'prisma-extension-kysely';
+import kysely from 'prisma-extension-kysely';
 
 const PrismaClientConstructor = require('@prisma/client').PrismaClient;
 
@@ -10,7 +9,7 @@ const createExtendedPrismaClient = () => {
   const prismaClient = new PrismaClientConstructor();
 
   return prismaClient.$extends(
-    KyselyExtension({
+    kysely({
       kysely: (driver: any) =>
         new Kysely<DB>({
           dialect: new PostgresDialect({

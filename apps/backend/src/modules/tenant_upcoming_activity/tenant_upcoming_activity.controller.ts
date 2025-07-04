@@ -22,7 +22,12 @@ export async function getAllTenantUpcomingActivities(req: Request, res: Response
 export async function createTenantUpcomingActivity(req: Request, res: Response) {
   try {
     const validatedData = createTenantUpcomingActivitySchema.parse(req.body);
-    const newTenantUpcomingActivity = await tenantUpcomingActivityService.createTenantUpcomingActivity(validatedData);
+    const mappedData = {
+      id: '', // TODO: generate or assign id
+      updatedAt: new Date(),
+      tenant_id: validatedData.tenantId,
+    };
+    const newTenantUpcomingActivity = await tenantUpcomingActivityService.createTenantUpcomingActivity(mappedData);
     res.status(201).json(newTenantUpcomingActivity);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -51,7 +56,10 @@ export async function updateTenantUpcomingActivity(req: Request, res: Response) 
   try {
     const { id } = req.params;
     const validatedData = updateTenantUpcomingActivitySchema.parse(req.body);
-    const updatedTenantUpcomingActivity = await tenantUpcomingActivityService.updateTenantUpcomingActivity(id, validatedData);
+    const mappedData = {
+      tenant_id: validatedData.tenantId,
+    };
+    const updatedTenantUpcomingActivity = await tenantUpcomingActivityService.updateTenantUpcomingActivity(id, mappedData);
     if (updatedTenantUpcomingActivity) {
       res.json(updatedTenantUpcomingActivity);
     } else {
