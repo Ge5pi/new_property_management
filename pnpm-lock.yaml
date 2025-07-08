@@ -45,9 +45,6 @@ importers:
       '@prisma/client':
         specifier: ^6.11.0
         version: 6.11.0(prisma@6.10.1(typescript@5.8.3))(typescript@5.8.3)
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -85,6 +82,9 @@ importers:
         specifier: ^3.25.67
         version: 3.25.67
     devDependencies:
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.3

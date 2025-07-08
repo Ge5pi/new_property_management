@@ -154,6 +154,12 @@ export type FixedAsset = {
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
+export type Group = {
+    id: string;
+    name: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type Inspection = {
     id: string;
     name: string;
@@ -598,6 +604,13 @@ export type RentalApplicationTemplate = {
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
+export type Role = {
+    id: string;
+    name: string;
+    description: string | null;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type SecondaryTenant = {
     id: string;
     first_name: string;
@@ -745,6 +758,14 @@ export type User = {
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
+export type UserGroups = {
+    A: string;
+    B: string;
+};
+export type UserRoles = {
+    A: string;
+    B: string;
+};
 export type Vendor = {
     id: string;
     first_name: string;
@@ -814,10 +835,13 @@ export type WorkOrder = {
 };
 export type DB = {
     _ProjectToUnit: ProjectToUnit;
+    _UserGroups: UserGroups;
+    _UserRoles: UserRoles;
     Applicant: Applicant;
     Area: Area;
     AreaItem: AreaItem;
     FixedAsset: FixedAsset;
+    Group: Group;
     Inspection: Inspection;
     Inventory: Inventory;
     Labor: Labor;
@@ -850,6 +874,7 @@ export type DB = {
     RentalApplicationPets: RentalApplicationPets;
     RentalApplicationResidentialHistory: RentalApplicationResidentialHistory;
     RentalApplicationTemplate: RentalApplicationTemplate;
+    Role: Role;
     SecondaryTenant: SecondaryTenant;
     ServiceRequest: ServiceRequest;
     ServiceRequestAttachment: ServiceRequestAttachment;
