@@ -10,6 +10,11 @@ interface ITokenObject {
   refresh: string;
 }
 
+interface ILoginResponse {
+  token: string;
+  user: ICurrentUser; // The user object is also in the response
+}
+
 declare type IAuthenticatedUser = ICurrentUser & Partial<ITokenObject>;
 interface ILoginUser {
   email: string;
@@ -69,27 +74,45 @@ const authenticationAPIs = api.injectEndpoints({
       },
     }),
 
-    loginUser: build.mutation<IAuthenticatedUser, ILoginUser>({
+     loginUser: build.mutation<IAuthenticatedUser, ILoginUser>({
       async queryFn(loginInfo, _queryApi, _extraOptions, fetchWithBQ) {
         const url =
           loginInfo.loginFor === 'admin' ? `/api/authentication/admin-token/` : `/api/authentication/tenant-token/`;
         const createToken = await fetchWithBQ({ url, method: 'post', data: loginInfo });
-        console.log('createToken', createToken);
 
         if (createToken && createToken.error) {
           return { error: createToken.error };
         }
 
-        const token = createToken.data as ITokenObject;
-        localStorage.setItem('ppm-session', token.access);
-        localStorage.setItem('ppm-session-ref', token.refresh);
+        // --- START: THE FIX ---
+
+        // 1. Cast the response data to the correct login response interface
+        const loginResponse = createToken.data as ILoginResponse;
+
+        // 2. Extract the actual token from the 'token' property
+        const accessToken = loginResponse.token;
+
+        if (!accessToken) {
+            // Handle cases where the login might succeed but the token is missing
+            return { error: { status: 401, data: { detail: 'Login succeeded, but token was not provided.'}}};
+        }
+
+        // 3. Save the correct token value to localStorage.
+        //    Your old code was saving `undefined` because it was looking for a 'refresh' token that doesn't exist in this response.
+        localStorage.setItem('ppm-session', accessToken);
+        // localStorage.setItem('ppm-session-ref', token.refresh); // This line is removed as 'refresh' is not part of the login response
+
+        // --- END: THE FIX ---
+
+        // Now that the correct token is saved, this next call will succeed.
         const currentUser = await fetchWithBQ({
           url: '/api/authentication/current-user-details/',
           method: 'get',
         });
 
+        // The user data is available in the original login response, but fetching it again is fine.
         return currentUser.data
-          ? { data: { ...currentUser.data, ...token } as IAuthenticatedUser }
+          ? { data: { ...currentUser.data } as IAuthenticatedUser } // We no longer need to merge token data here
           : { error: currentUser.error };
       },
     }),
