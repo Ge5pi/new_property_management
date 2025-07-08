@@ -1,18 +1,14 @@
 import express from 'express';
-import cors from 'cors';
+import corsMiddleware from './middleware/cors.middleware';
 import apiRouter from './api';
+import roleRouter from './modules/role/role.router';
 
 const app = express();
 
-// Enable CORS for all origins and handle preflight requests
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));
+app.use(corsMiddleware);
 
 app.use(express.json());
 app.use('/api', apiRouter);
+app.use('/api/roles', roleRouter);
 
 export default app;

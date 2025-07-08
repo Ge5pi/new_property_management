@@ -56,7 +56,7 @@ import projectRouter from '../modules/project/project.router';
 
 const router = Router();
 
-router.use('/auth', authRouter);
+router.use('/authentication', authRouter);
 
 // Apply authentication middleware to all routes below this point
 router.use(authenticateToken);
