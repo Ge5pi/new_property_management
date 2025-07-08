@@ -1,4 +1,8 @@
 import { Request, Response } from 'express';
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 import { sign, verify, SignOptions } from 'jsonwebtoken';
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../../config';
 import { db } from '../../database/custom-prisma-client';
@@ -93,7 +97,7 @@ export async function adminToken(req: Request, res: Response): Promise<void> {
 
 export async function currentUserDetails(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
 
     if (!userId) {
       res.status(401).json({ detail: 'Authentication token is missing or invalid.' });
