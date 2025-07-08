@@ -14,9 +14,13 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^20.19.4",
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.0",
+    "prisma-kysely": "^1.8.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
+    "dotenv": "^17.1.0",
     "express": "^5.1.0",
     "kysely": "^0.26.3"
   }

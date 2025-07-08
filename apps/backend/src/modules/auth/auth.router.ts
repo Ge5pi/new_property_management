@@ -1,9 +1,10 @@
-import { Router, RequestHandler } from 'express';
+import { Router } from 'express';
 import * as authController from './auth.controller';
 
 const router = Router();
 
-router.post('/register', authController.register as RequestHandler);
-router.post('/login', authController.login as RequestHandler);
+router.post('/admin-token', (req, res, next) => {
+  authController.adminToken(req, res).catch(next);
+});
 
 export default router;

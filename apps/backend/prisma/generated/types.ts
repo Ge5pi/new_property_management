@@ -732,6 +732,19 @@ export type UnitUpcomingActivity = {
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
+export type User = {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    username: string | null;
+    isActive: Generated<boolean>;
+    isStaff: Generated<boolean>;
+    isSuperuser: Generated<boolean>;
+    passwordHash: string;
+    createdAt: Generated<Timestamp>;
+    updatedAt: Timestamp;
+};
 export type Vendor = {
     id: string;
     first_name: string;
@@ -849,6 +862,7 @@ export type DB = {
     UnitTypeAmenity: UnitTypeAmenity;
     UnitTypePhoto: UnitTypePhoto;
     UnitUpcomingActivity: UnitUpcomingActivity;
+    User: User;
     Vendor: Vendor;
     VendorAddress: VendorAddress;
     VendorAttachment: VendorAttachment;

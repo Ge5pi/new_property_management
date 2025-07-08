@@ -1,50 +1,56 @@
 import { Request, Response } from 'express';
-import * as authService from './auth.service';
-import { z } from 'zod';
-import jwt from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
+import { db } from '../../database/custom-prisma-client';
+import bcrypt from 'bcryptjs';
 
-const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  firstName: z.string(),
-  lastName: z.string(),
-});
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
+const JWT_EXPIRES_IN = '1h';
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
+export async function adminToken(req: Request, res: Response) {
+  const { email, password } = req.body;
 
-export async function register(req: Request, res: Response) {
-  try {
-    const validatedData = registerSchema.parse(req.body);
-    const newUser = await authService.registerUser(validatedData);
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors });
-    } else {
-      res.status(500).json({ error: 'Failed to register user' });
-    }
+  if (!email || !password) {
+    return res.status(400).json({ detail: 'Email and password are required.' });
   }
-}
 
-export async function login(req: Request, res: Response) {
   try {
-    const validatedData = loginSchema.parse(req.body);
-    const user = await authService.loginUser(validatedData.email, validatedData.password);
+    const user = await db.user.findUnique({
+      where: { email },
+    });
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ detail: 'Invalid credentials.' });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors });
-    } else {
-      res.status(500).json({ error: (error as Error).message });
+    const passwordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!passwordValid) {
+      return res.status(401).json({ detail: 'Invalid credentials.' });
     }
+
+    // Check if user is admin or subscription staff and has associated subscription
+    if (
+      (user.isAdmin || user.isSubscriptionStaff) &&
+      user.associatedSubscriptionId !== null
+    ) {
+      const token = sign(
+        { userId: user.id, email: user.email, isAdmin: user.isAdmin },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
+
+      return res.json({
+        accessToken: token,
+        tokenType: 'Bearer',
+        expiresIn: JWT_EXPIRES_IN,
+        isAdmin: user.isAdmin,
+      });
+    } else {
+      return res.status(403).json({
+        detail: 'You are not allowed to login. Please contact your administrator.',
+      });
+    }
+  } catch (error) {
+    console.error('Error in adminToken:', error);
+    return res.status(500).json({ detail: 'Internal server error.' });
   }
 }
