@@ -38,7 +38,7 @@ const TenantLogin = () => {
             loginUser({ ...values, loginFor: 'tenant' })
               .unwrap()
               .then(response => {
-                if (response.access && response.refresh) {
+                if (response.access) {
                   handleLogin(true, response.access, response);
 
                   let path = `/tenant/dashboard`;

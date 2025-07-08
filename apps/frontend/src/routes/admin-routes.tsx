@@ -1,5 +1,7 @@
 import { lazy } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+
+import { useAuthState } from 'hooks/useAuthState';
 
 import { SinglePropertyLoader } from 'services/loaders/property';
 
@@ -13,7 +15,6 @@ import { LoaderType } from 'interfaces/IGeneral';
 import GetCrumbs from './crumbs';
 import ErrorBoundary from './error-boundary';
 import { RouteWithPermissions } from './route-wrapper';
-import PrivateRoute, { ProtectedRoute } from './secured-routes';
 
 const ReportsLanding = lazy(() => import('pages/admin/reports/reports-landing'));
 
@@ -187,900 +188,875 @@ const OwnerModify = lazy(() => import('pages/admin/peoples/owners/owners-modify'
 
 const LoginAdmin = lazy(() => import('pages/admin/login/login'));
 
-export const admin: RouteWithPermissions[] = [
+export const AdminLayoutWrapper = () => {
+  const { authenticated } = useAuthState();
+  if (!authenticated) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  return <AdminLayout />;
+};
+
+export const LoginPageGuard = () => {
+  const { authenticated } = useAuthState();
+  if (authenticated) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return <LoginAdmin />;
+};
+
+export const adminRoutes: RouteWithPermissions[] = [
   {
-    path: '/',
-    errorElement: <ErrorBoundary />,
+    path: 'dashboard',
+    element: <AdminDashboard />,
+    handle: { crumb: () => <GetCrumbs data="Dashboard" /> },
     children: [
       {
         index: true,
-        element: <Navigate to="admin" replace />,
+        key: PERMISSIONS.GENERAL_DASHBOARD,
+        element: <DashboardGeneral />,
       },
       {
-        path: 'admin',
-        element: <ProtectedRoute />,
+        path: 'financial',
+        element: <DashboardFinancial />,
+      },
+    ],
+  },
+  {
+    path: 'properties',
+    key: PERMISSIONS.PROPERTY,
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Properties" /> },
+    children: [
+      {
+        index: true,
+        element: <Properties />,
+      },
+      {
+        path: 'list',
+        element: <PropertyList />,
+      },
+      {
+        path: 'new',
+        element: <PropertyForm />,
+      },
+      {
+        path: 'edit/:id',
+        element: <PropertyForm />,
+      },
+      {
+        path: ':property',
+        element: <PropertyDetailWrapper />,
+        handle: { crumb: (data: LoaderType<unknown>) => <GetCrumbs data={data} dataKey="name" /> },
+        loader: SinglePropertyLoader,
         children: [
           {
-            index: true,
-            element: <LoginAdmin />,
+            path: 'details',
+            element: <PropertyDetails />,
+          },
+          {
+            path: 'units',
+            element: <OutletSuspense />,
+            children: [
+              {
+                index: true,
+                element: <Units />,
+              },
+              {
+                path: 'details/:unit',
+                element: <UnitDetails />,
+              },
+            ],
+          },
+          {
+            path: 'rentable-items',
+            element: <OutletSuspense />,
+            children: [
+              {
+                index: true,
+                element: <RentableItems />,
+              },
+              {
+                path: 'details/:rentable',
+                element: <RentableItemsDetail />,
+              },
+            ],
+          },
+          {
+            path: 'unit-types',
+            element: <OutletSuspense />,
+            children: [
+              {
+                index: true,
+                element: <UnitTypes />,
+              },
+              {
+                path: 'details/:type',
+                element: <UnitTypeDetails />,
+              },
+            ],
+          },
+          {
+            path: 'budget',
+            element: <Budget />,
+          },
+          {
+            path: 'marketing',
+            element: <Marketing />,
+          },
+          {
+            path: '*',
+            element: <Navigate to="details" replace />,
           },
         ],
       },
       {
-        path: 'admin',
-        element: <PrivateRoute />,
+        path: 'associations',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Associations" /> },
         children: [
           {
-            element: <OutletSuspense />,
+            index: true,
+            element: <Associations />,
+          },
+          {
+            path: ':property',
+            element: <AssociationDetailWrapper />,
+            handle: { crumb: (data: LoaderType<unknown>) => <GetCrumbs data={data} dataKey="name" /> },
+            loader: SinglePropertyLoader,
             children: [
               {
-                element: <AdminLayout />,
+                path: 'details',
+                element: <PropertyDetails />,
+              },
+              {
+                path: 'units',
+                element: <OutletSuspense />,
                 children: [
                   {
-                    path: 'dashboard',
-                    element: <AdminDashboard />,
-                    handle: { crumb: () => <GetCrumbs data="Dashboard" /> },
-                    children: [
-                      {
-                        index: true,
-                        key: PERMISSIONS.GENERAL_DASHBOARD,
-                        element: <DashboardGeneral />,
-                      },
-                      {
-                        path: 'financial',
-                        element: <DashboardFinancial />,
-                      },
-                    ],
+                    index: true,
+                    element: <Units />,
                   },
                   {
-                    path: 'properties',
-                    key: PERMISSIONS.PROPERTY,
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Properties" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Properties />,
-                      },
-                      {
-                        path: 'list',
-                        element: <PropertyList />,
-                      },
-                      {
-                        path: 'new',
-                        element: <PropertyForm />,
-                      },
-                      {
-                        path: 'edit/:id',
-                        element: <PropertyForm />,
-                      },
-                      {
-                        path: ':property',
-                        element: <PropertyDetailWrapper />,
-                        handle: { crumb: (data: LoaderType<unknown>) => <GetCrumbs data={data} dataKey="name" /> },
-                        loader: SinglePropertyLoader,
-                        children: [
-                          {
-                            path: 'details',
-                            element: <PropertyDetails />,
-                          },
-                          {
-                            path: 'units',
-                            element: <OutletSuspense />,
-                            children: [
-                              {
-                                index: true,
-                                element: <Units />,
-                              },
-                              {
-                                path: 'details/:unit',
-                                element: <UnitDetails />,
-                              },
-                            ],
-                          },
-                          {
-                            path: 'rentable-items',
-                            element: <OutletSuspense />,
-                            children: [
-                              {
-                                index: true,
-                                element: <RentableItems />,
-                              },
-                              {
-                                path: 'details/:rentable',
-                                element: <RentableItemsDetail />,
-                              },
-                            ],
-                          },
-                          {
-                            path: 'unit-types',
-                            element: <OutletSuspense />,
-                            children: [
-                              {
-                                index: true,
-                                element: <UnitTypes />,
-                              },
-                              {
-                                path: 'details/:type',
-                                element: <UnitTypeDetails />,
-                              },
-                            ],
-                          },
-                          {
-                            path: 'budget',
-                            element: <Budget />,
-                          },
-                          {
-                            path: 'marketing',
-                            element: <Marketing />,
-                          },
-                          {
-                            path: '*',
-                            element: <Navigate to="details" replace />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'associations',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Associations" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Associations />,
-                          },
-                          {
-                            path: ':property',
-                            element: <AssociationDetailWrapper />,
-                            handle: { crumb: (data: LoaderType<unknown>) => <GetCrumbs data={data} dataKey="name" /> },
-                            loader: SinglePropertyLoader,
-                            children: [
-                              {
-                                path: 'details',
-                                element: <PropertyDetails />,
-                              },
-                              {
-                                path: 'units',
-                                element: <OutletSuspense />,
-                                children: [
-                                  {
-                                    index: true,
-                                    element: <Units />,
-                                  },
-                                  {
-                                    path: 'details/:unit',
-                                    element: <UnitDetails />,
-                                  },
-                                ],
-                              },
-                              {
-                                path: 'unit-types',
-                                element: <OutletSuspense />,
-                                children: [
-                                  {
-                                    index: true,
-                                    element: <UnitTypes />,
-                                  },
-                                  {
-                                    path: 'details/:type',
-                                    element: <UnitTypeDetails />,
-                                  },
-                                ],
-                              },
-                              {
-                                path: 'directors',
-                                element: <BoardOfDirectors />,
-                              },
-                              {
-                                path: 'approvals',
-                                element: <Approvals />,
-                              },
-                              {
-                                path: 'arch-reviews',
-                                element: <ArchitecturalReviews />,
-                              },
-                              {
-                                path: 'budget',
-                                element: <Budget />,
-                              },
-                              {
-                                path: 'violations',
-                                element: <Violations />,
-                              },
-                              {
-                                path: 'settings',
-                                element: <Settings />,
-                              },
-                              {
-                                path: '*',
-                                element: <Navigate to="details" replace />,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    path: 'maintenance',
-                    key: PERMISSIONS.MAINTENANCE,
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Maintenance" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Navigate to="service-requests" replace />,
-                      },
-                      {
-                        path: 'service-requests',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Service Requests" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <ServiceRequests />,
-                          },
-                          {
-                            path: 'details/:request',
-                            element: <ServiceRequestDetails />,
-                          },
-                          {
-                            path: 'create',
-                            element: <ServiceRequestCreate />,
-                          },
-                          {
-                            path: 'modify/:request',
-                            element: <ServiceRequestModify />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'work-orders',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Work Orders" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <WorkOrders />,
-                          },
-                          {
-                            path: ':order/details/:request',
-                            element: <WorkOrderDetails />,
-                          },
-                          {
-                            path: 'create/:request?',
-                            element: <WorkOrderCreate />,
-                          },
-                          {
-                            path: ':order/modify/:request',
-                            element: <WorkOrderModify />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'inspections',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Inspections" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Inspections />,
-                          },
-                          {
-                            path: 'details/:inspection',
-                            element: <InspectionDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'projects',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Projects" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Projects />,
-                          },
-                          {
-                            path: 'details/:project',
-                            element: <ProjectDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'purchase-orders',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Purchase Orders" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <PurchaseOrders />,
-                          },
-                          {
-                            path: 'details/:purchase',
-                            element: <PurchaseOrderDetails />,
-                          },
-                          {
-                            path: 'create',
-                            element: <PurchaseOrderCreate />,
-                          },
-                          {
-                            path: 'modify/:purchase',
-                            element: <PurchaseOrderModify />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'inventory',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Inventory" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Inventory />,
-                          },
-                          {
-                            path: 'details/:inventory',
-                            element: <InventoryDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'fixed-assets',
-                        element: <FixedAssets />,
-                        handle: { crumb: () => <GetCrumbs data="Fixed Assets" /> },
-                      },
-                    ],
-                  },
-                  {
-                    path: 'calendar',
-                    element: <Calendar />,
-                    handle: { crumb: () => <GetCrumbs data="Calendar" /> },
-                  },
-                  {
-                    path: 'accounts',
-                    key: PERMISSIONS.ACCOUNTS,
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Accounts" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Navigate to="receivables" replace />,
-                      },
-                      {
-                        path: 'receivables',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Receivables" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Invoices />,
-                            handle: { crumb: () => <GetCrumbs data="Invoices" /> },
-                          },
-                          {
-                            path: ':invoice/details',
-                            element: <InvoiceDetails />,
-                          },
-                          {
-                            path: 'charges',
-                            element: <OutletSuspense />,
-                            handle: { crumb: () => <GetCrumbs data="Charges" /> },
-                            children: [
-                              {
-                                index: true,
-                                element: <Charges />,
-                              },
-                              {
-                                path: ':charge/modify',
-                                element: <ModifyCharges />,
-                              },
-                              {
-                                path: ':charge/details',
-                                element: <ChargeDetail />,
-                              },
-                              {
-                                path: 'create',
-                                element: <CreateCharges />,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                      {
-                        path: 'payable',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Payable" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Bills />,
-                            handle: { crumb: () => <GetCrumbs data="Bills" /> },
-                          },
-                          {
-                            path: 'bills/:bill_type',
-                            element: <Bills />,
-                            handle: { crumb: () => <GetCrumbs data="Bills" /> },
-                          },
-                          {
-                            path: 'recurring',
-                            element: <Recurring />,
-                            handle: { crumb: () => <GetCrumbs data="Recurring" /> },
-                          },
-                        ],
-                      },
-                      {
-                        path: 'bank-accounts',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Charges" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <BankAccounts />,
-                          },
-                          {
-                            path: ':account_id/modify',
-                            element: <BankAccountModify />,
-                          },
-                          {
-                            path: ':account_id/details',
-                            element: <BankAccountDetails />,
-                          },
-                          {
-                            path: 'create',
-                            element: <BankAccountCreate />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'payments',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Payments" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Payments />,
-                          },
-                          {
-                            path: 'details/:id',
-                            element: <PaymentsDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'journal-entries',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Journal Entries" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Navigate to="asset" replace />,
-                          },
-                          {
-                            path: ':account',
-                            element: <JournalEntries />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'gl-accounts',
-                        element: <GL />,
-                        handle: { crumb: () => <GetCrumbs data="GL Accounts" /> },
-                      },
-                    ],
-                  },
-                  {
-                    path: 'leasing',
-                    key: PERMISSIONS.LEASING,
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Leasing" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Navigate to="rental-applications" replace />,
-                      },
-                      {
-                        path: 'rental-applications',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Rental Applications" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <RentalApplications />,
-                          },
-                          {
-                            path: ':applicant/details/:application',
-                            element: <RentalApplicationDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'leases',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Leases" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Leases />,
-                          },
-                          {
-                            path: ':lease/modify',
-                            element: <LeaseModify />,
-                          },
-                          {
-                            path: ':lease/renew',
-                            element: <LeaseRenew />,
-                          },
-                          {
-                            path: 'details/:lease',
-                            element: <LeaseDetails />,
-                          },
-                          {
-                            path: 'create',
-                            element: <LeaseCreate />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'templates',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Templates" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <RentalTemplates />,
-                            handle: { crumb: () => <GetCrumbs data="Rental Application" /> },
-                          },
-                          {
-                            path: ':template/details',
-                            element: <RentalTemplateDetails />,
-                          },
-                          {
-                            path: 'leases',
-                            element: <OutletSuspense />,
-                            children: [
-                              {
-                                index: true,
-                                element: <LeaseTemplates />,
-                                handle: { crumb: () => <GetCrumbs data="Lease" /> },
-                              },
-                              {
-                                path: ':template/details',
-                                element: <LeaseTemplateDetails />,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    path: 'peoples',
-                    key: PERMISSIONS.PEOPLE,
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Peoples" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Navigate to="tenants" replace />,
-                      },
-                      {
-                        path: 'tenants',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Tenants" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Tenants />,
-                          },
-                          {
-                            path: ':tenant/details',
-                            element: <TenantDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'vendors',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Vendors" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Vendors />,
-                          },
-                          {
-                            path: 'create',
-                            element: <VendorCreate />,
-                          },
-                          {
-                            path: ':vendor/modify',
-                            element: <VendorModify />,
-                          },
-                          {
-                            path: ':vendor',
-                            element: <VendorDetailWrapper />,
-                            children: [
-                              {
-                                path: 'general-details',
-                                element: <VendorGeneralDetails />,
-                                handle: { crumb: () => <GetCrumbs data="General Details" /> },
-                              },
-                              {
-                                path: 'finances-details',
-                                element: <VendorFinancesDetails />,
-                                handle: { crumb: () => <GetCrumbs data="Financial Details" /> },
-                              },
-                              {
-                                path: 'messages',
-                                key: PERMISSIONS.COMMUNICATION,
-                                element: <OutletSuspense />,
-                                handle: { crumb: () => <GetCrumbs data="Communications" /> },
-                                children: [
-                                  {
-                                    index: true,
-                                    element: <VendorCommunicationList />,
-                                  },
-                                ],
-                              },
-                            ],
-                          },
-                          {
-                            path: 'types',
-                            handle: { crumb: () => <GetCrumbs data="Types" /> },
-                            element: <VendorTypes />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'owners',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Owners" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Owners />,
-                          },
-                          {
-                            path: ':owner/details',
-                            element: <OwnerDetails />,
-                          },
-                          {
-                            path: 'create',
-                            element: <OwnerCreate />,
-                          },
-                          {
-                            path: ':owner/modify',
-                            element: <OwnerModify />,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    path: 'communication',
-                    key: PERMISSIONS.COMMUNICATION,
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Communication" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Navigate to="announcements" replace />,
-                      },
-                      {
-                        path: 'announcements',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Announcements" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Announcements />,
-                          },
-                          {
-                            path: 'create',
-                            element: <AnnouncementsCreate />,
-                          },
-                          {
-                            path: 'modify/:announcement',
-                            element: <AnnouncementsModify />,
-                          },
-                          {
-                            path: 'details/:announcement',
-                            element: <AnnouncementsDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'emails',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Emails" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Email />,
-                          },
-                          {
-                            path: 'details/:email',
-                            element: <EmailDetails />,
-                          },
-                          {
-                            path: 'create',
-                            element: <EmailCRUD />,
-                          },
-                          {
-                            path: 'template',
-                            element: <OutletSuspense />,
-                            handle: { crumb: () => <GetCrumbs data="Email Templates" /> },
-                            children: [
-                              {
-                                index: true,
-                                element: <EmailTemplates />,
-                              },
-                              {
-                                path: 'details/:template',
-                                element: <EmailTemplateDetails />,
-                              },
-                              {
-                                path: 'modify/:template',
-                                element: <EmailTemplateModify />,
-                              },
-                              {
-                                path: 'create',
-                                element: <EmailTemplateCreate />,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                      {
-                        path: 'contacts',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Contacts" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Contacts />,
-                          },
-                          {
-                            path: 'create',
-                            element: <ContactsCreate />,
-                          },
-                          {
-                            path: 'modify/:contact',
-                            element: <ContactsModify />,
-                          },
-                          {
-                            path: 'details/:contact',
-                            element: <ContactsDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'notes',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Notes" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Notes />,
-                          },
-                          {
-                            path: 'details/:note',
-                            element: <NotesDetails />,
-                          },
-                          {
-                            path: 'modify/:note',
-                            element: <NotesModify />,
-                          },
-                          {
-                            path: 'create',
-                            element: <NotesCreate />,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    path: 'reports',
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Reports" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Reports />,
-                      },
-                      {
-                        path: ':report',
-                        element: <ReportsLanding />,
-                      },
-                    ],
+                    path: 'details/:unit',
+                    element: <UnitDetails />,
                   },
                 ],
               },
               {
-                element: <AdminLayout noSidebar />,
+                path: 'unit-types',
+                element: <OutletSuspense />,
                 children: [
                   {
-                    path: 'settings',
-                    element: <SecondarySidebar />,
-                    handle: { crumb: () => <GetCrumbs data="Settings" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Navigate to="system-preferences" replace />,
-                      },
-                      {
-                        path: 'system-preferences',
-                        key: PERMISSIONS.SYSTEM_PREFERENCES,
-                        element: <SystemPreferenceWrapper />,
-                        handle: { crumb: () => <GetCrumbs data="System Preferences" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <TypesCategories />,
-                          },
-                          {
-                            path: 'general',
-                            element: <General />,
-                          },
-                          {
-                            path: 'management-fee',
-                            element: <ManagementFee />,
-                          },
-                        ],
-                      },
-                      {
-                        key: PERMISSIONS.ADMIN,
-                        subscription: true,
-                        path: 'business-information',
-                        element: <BusinessInformation />,
-                        handle: { crumb: () => <GetCrumbs data="Business Information" /> },
-                      },
-                      {
-                        key: PERMISSIONS.ADMIN,
-                        subscription: true,
-                        path: 'users-and-roles',
-                        element: <OutletSuspense />,
-                        children: [
-                          {
-                            index: true,
-                            element: <Users />,
-                            handle: { crumb: () => <GetCrumbs data="Users" /> },
-                          },
-                          {
-                            path: 'create',
-                            element: <UserCreate />,
-                          },
-                          {
-                            path: 'modify/:user',
-                            element: <UserModify />,
-                          },
-                          {
-                            path: 'details/:user',
-                            element: <UserDetails />,
-                          },
-                          {
-                            path: 'roles',
-                            element: <OutletSuspense />,
-                            children: [
-                              {
-                                index: true,
-                                element: <Roles />,
-                                handle: { crumb: () => <GetCrumbs data="Roles" /> },
-                              },
-                              {
-                                path: 'create',
-                                element: <RolesCreate />,
-                              },
-                              {
-                                path: 'modify/:role',
-                                element: <RolesModify />,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
+                    index: true,
+                    element: <UnitTypes />,
+                  },
+                  {
+                    path: 'details/:type',
+                    element: <UnitTypeDetails />,
                   },
                 ],
+              },
+              {
+                path: 'directors',
+                element: <BoardOfDirectors />,
+              },
+              {
+                path: 'approvals',
+                element: <Approvals />,
+              },
+              {
+                path: 'arch-reviews',
+                element: <ArchitecturalReviews />,
+              },
+              {
+                path: 'budget',
+                element: <Budget />,
+              },
+              {
+                path: 'violations',
+                element: <Violations />,
+              },
+              {
+                path: 'settings',
+                element: <Settings />,
+              },
+              {
+                path: '*',
+                element: <Navigate to="details" replace />,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'maintenance',
+    key: PERMISSIONS.MAINTENANCE,
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Maintenance" /> },
+    children: [
+      {
+        index: true,
+        element: <Navigate to="service-requests" replace />,
+      },
+      {
+        path: 'service-requests',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Service Requests" /> },
+        children: [
+          {
+            index: true,
+            element: <ServiceRequests />,
+          },
+          {
+            path: 'details/:request',
+            element: <ServiceRequestDetails />,
+          },
+          {
+            path: 'create',
+            element: <ServiceRequestCreate />,
+          },
+          {
+            path: 'modify/:request',
+            element: <ServiceRequestModify />,
+          },
+        ],
+      },
+      {
+        path: 'work-orders',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Work Orders" /> },
+        children: [
+          {
+            index: true,
+            element: <WorkOrders />,
+          },
+          {
+            path: ':order/details/:request',
+            element: <WorkOrderDetails />,
+          },
+          {
+            path: 'create/:request?',
+            element: <WorkOrderCreate />,
+          },
+          {
+            path: ':order/modify/:request',
+            element: <WorkOrderModify />,
+          },
+        ],
+      },
+      {
+        path: 'inspections',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Inspections" /> },
+        children: [
+          {
+            index: true,
+            element: <Inspections />,
+          },
+          {
+            path: 'details/:inspection',
+            element: <InspectionDetails />,
+          },
+        ],
+      },
+      {
+        path: 'projects',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Projects" /> },
+        children: [
+          {
+            index: true,
+            element: <Projects />,
+          },
+          {
+            path: ':project',
+            element: <ProjectDetails />,
+          },
+        ],
+      },
+      {
+        path: 'purchase-orders',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Purchase Orders" /> },
+        children: [
+          {
+            index: true,
+            element: <PurchaseOrders />,
+          },
+          {
+            path: 'details/:purchase',
+            element: <PurchaseOrderDetails />,
+          },
+          {
+            path: 'create',
+            element: <PurchaseOrderCreate />,
+          },
+          {
+            path: 'modify/:purchase',
+            element: <PurchaseOrderModify />,
+          },
+        ],
+      },
+      {
+        path: 'inventory',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Inventory" /> },
+        children: [
+          {
+            index: true,
+            element: <Inventory />,
+          },
+          {
+            path: 'details/:inventory',
+            element: <InventoryDetails />,
+          },
+        ],
+      },
+      {
+        path: 'fixed-assets',
+        element: <FixedAssets />,
+        handle: { crumb: () => <GetCrumbs data="Fixed Assets" /> },
+      },
+    ],
+  },
+  {
+    path: 'calendar',
+    element: <Calendar />,
+    handle: { crumb: () => <GetCrumbs data="Calendar" /> },
+  },
+  {
+    path: 'accounts',
+    key: PERMISSIONS.ACCOUNTS,
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Accounts" /> },
+    children: [
+      {
+        index: true,
+        element: <Navigate to="receivables" replace />,
+      },
+      {
+        path: 'receivables',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Receivables" /> },
+        children: [
+          {
+            index: true,
+            element: <Invoices />,
+            handle: { crumb: () => <GetCrumbs data="Invoices" /> },
+          },
+          {
+            path: ':invoice/details',
+            element: <InvoiceDetails />,
+          },
+          {
+            path: 'charges',
+            element: <OutletSuspense />,
+            handle: { crumb: () => <GetCrumbs data="Charges" /> },
+            children: [
+              {
+                index: true,
+                element: <Charges />,
+              },
+              {
+                path: ':charge/modify',
+                element: <ModifyCharges />,
+              },
+              {
+                path: ':charge/details',
+                element: <ChargeDetail />,
+              },
+              {
+                path: 'create',
+                element: <CreateCharges />,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'payable',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Payable" /> },
+        children: [
+          {
+            index: true,
+            element: <Bills />,
+            handle: { crumb: () => <GetCrumbs data="Bills" /> },
+          },
+          {
+            path: 'bills/:bill_type',
+            element: <Bills />,
+            handle: { crumb: () => <GetCrumbs data="Bills" /> },
+          },
+          {
+            path: 'recurring',
+            element: <Recurring />,
+            handle: { crumb: () => <GetCrumbs data="Recurring" /> },
+          },
+        ],
+      },
+      {
+        path: 'bank-accounts',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Charges" /> },
+        children: [
+          {
+            index: true,
+            element: <BankAccounts />,
+          },
+          {
+            path: ':account_id/modify',
+            element: <BankAccountModify />,
+          },
+          {
+            path: ':account_id/details',
+            element: <BankAccountDetails />,
+          },
+          {
+            path: 'create',
+            element: <BankAccountCreate />,
+          },
+        ],
+      },
+      {
+        path: 'payments',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Payments" /> },
+        children: [
+          {
+            index: true,
+            element: <Payments />,
+          },
+          {
+            path: 'details/:id',
+            element: <PaymentsDetails />,
+          },
+        ],
+      },
+      {
+        path: 'journal-entries',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Journal Entries" /> },
+        children: [
+          {
+            index: true,
+            element: <Navigate to="asset" replace />,
+          },
+          {
+            path: ':account',
+            element: <JournalEntries />,
+          },
+        ],
+      },
+      {
+        path: 'gl-accounts',
+        element: <GL />,
+        handle: { crumb: () => <GetCrumbs data="GL Accounts" /> },
+      },
+    ],
+  },
+  {
+    path: 'leasing',
+    key: PERMISSIONS.LEASING,
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Leasing" /> },
+    children: [
+      {
+        index: true,
+        element: <Navigate to="rental-applications" replace />,
+      },
+      {
+        path: 'rental-applications',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Rental Applications" /> },
+        children: [
+          {
+            index: true,
+            element: <RentalApplications />,
+          },
+          {
+            path: ':applicant/details/:application',
+            element: <RentalApplicationDetails />,
+          },
+        ],
+      },
+      {
+        path: 'leases',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Leases" /> },
+        children: [
+          {
+            index: true,
+            element: <Leases />,
+          },
+          {
+            path: ':lease/modify',
+            element: <LeaseModify />,
+          },
+          {
+            path: ':lease/renew',
+            element: <LeaseRenew />,
+          },
+          {
+            path: 'details/:lease',
+            element: <LeaseDetails />,
+          },
+          {
+            path: 'create',
+            element: <LeaseCreate />,
+          },
+        ],
+      },
+      {
+        path: 'templates',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Templates" /> },
+        children: [
+          {
+            index: true,
+            element: <RentalTemplates />,
+            handle: { crumb: () => <GetCrumbs data="Rental Application" /> },
+          },
+          {
+            path: ':template/details',
+            element: <RentalTemplateDetails />,
+          },
+          {
+            path: 'leases',
+            element: <OutletSuspense />,
+            children: [
+              {
+                index: true,
+                element: <LeaseTemplates />,
+                handle: { crumb: () => <GetCrumbs data="Lease" /> },
+              },
+              {
+                path: ':template/details',
+                element: <LeaseTemplateDetails />,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'peoples',
+    key: PERMISSIONS.PEOPLE,
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Peoples" /> },
+    children: [
+      {
+        index: true,
+        element: <Navigate to="tenants" replace />,
+      },
+      {
+        path: 'tenants',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Tenants" /> },
+        children: [
+          {
+            index: true,
+            element: <Tenants />,
+          },
+          {
+            path: ':tenant/details',
+            element: <TenantDetails />,
+          },
+        ],
+      },
+      {
+        path: 'vendors',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Vendors" /> },
+        children: [
+          {
+            index: true,
+            element: <Vendors />,
+          },
+          {
+            path: 'create',
+            element: <VendorCreate />,
+          },
+          {
+            path: ':vendor/modify',
+            element: <VendorModify />,
+          },
+          {
+            path: ':vendor',
+            element: <VendorDetailWrapper />,
+            children: [
+              {
+                path: 'general-details',
+                element: <VendorGeneralDetails />,
+                handle: { crumb: () => <GetCrumbs data="General Details" /> },
+              },
+              {
+                path: 'finances-details',
+                element: <VendorFinancesDetails />,
+                handle: { crumb: () => <GetCrumbs data="Financial Details" /> },
+              },
+              {
+                path: 'messages',
+                key: PERMISSIONS.COMMUNICATION,
+                element: <OutletSuspense />,
+                handle: { crumb: () => <GetCrumbs data="Communications" /> },
+                children: [
+                  {
+                    index: true,
+                    element: <VendorCommunicationList />,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: 'types',
+            handle: { crumb: () => <GetCrumbs data="Types" /> },
+            element: <VendorTypes />,
+          },
+        ],
+      },
+      {
+        path: 'owners',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Owners" /> },
+        children: [
+          {
+            index: true,
+            element: <Owners />,
+          },
+          {
+            path: ':owner/details',
+            element: <OwnerDetails />,
+          },
+          {
+            path: 'create',
+            element: <OwnerCreate />,
+          },
+          {
+            path: ':owner/modify',
+            element: <OwnerModify />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'communication',
+    key: PERMISSIONS.COMMUNICATION,
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Communication" /> },
+    children: [
+      {
+        index: true,
+        element: <Navigate to="announcements" replace />,
+      },
+      {
+        path: 'announcements',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Announcements" /> },
+        children: [
+          {
+            index: true,
+            element: <Announcements />,
+          },
+          {
+            path: 'create',
+            element: <AnnouncementsCreate />,
+          },
+          {
+            path: 'modify/:announcement',
+            element: <AnnouncementsModify />,
+          },
+          {
+            path: 'details/:announcement',
+            element: <AnnouncementsDetails />,
+          },
+        ],
+      },
+      {
+        path: 'emails',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Emails" /> },
+        children: [
+          {
+            index: true,
+            element: <Email />,
+          },
+          {
+            path: 'details/:email',
+            element: <EmailDetails />,
+          },
+          {
+            path: 'create',
+            element: <EmailCRUD />,
+          },
+          {
+            path: 'template',
+            element: <OutletSuspense />,
+            handle: { crumb: () => <GetCrumbs data="Email Templates" /> },
+            children: [
+              {
+                index: true,
+                element: <EmailTemplates />,
+              },
+              {
+                path: ':template/details',
+                element: <EmailTemplateDetails />,
+              },
+              {
+                path: 'modify/:template',
+                element: <EmailTemplateModify />,
+              },
+              {
+                path: 'create',
+                element: <EmailTemplateCreate />,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'contacts',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Contacts" /> },
+        children: [
+          {
+            index: true,
+            element: <Contacts />,
+          },
+          {
+            path: 'create',
+            element: <ContactsCreate />,
+          },
+          {
+            path: 'modify/:contact',
+            element: <ContactsModify />,
+          },
+          {
+            path: 'details/:contact',
+            element: <ContactsDetails />,
+          },
+        ],
+      },
+      {
+        path: 'notes',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Notes" /> },
+        children: [
+          {
+            index: true,
+            element: <Notes />,
+          },
+          {
+            path: 'details/:note',
+            element: <NotesDetails />,
+          },
+          {
+            path: 'modify/:note',
+            element: <NotesModify />,
+          },
+          {
+            path: 'create',
+            element: <NotesCreate />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'reports',
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Reports" /> },
+    children: [
+      {
+        index: true,
+        element: <Reports />,
+      },
+      {
+        path: ':report',
+        element: <ReportsLanding />,
+      },
+    ],
+  },
+  {
+    path: 'settings',
+    element: <SecondarySidebar />,
+    handle: { crumb: () => <GetCrumbs data="Settings" /> },
+    children: [
+      {
+        index: true,
+        element: <Navigate to="system-preferences" replace />,
+      },
+      {
+        path: 'system-preferences',
+        key: PERMISSIONS.SYSTEM_PREFERENCES,
+        element: <SystemPreferenceWrapper />,
+        handle: { crumb: () => <GetCrumbs data="System Preferences" /> },
+        children: [
+          {
+            index: true,
+            element: <TypesCategories />,
+          },
+          {
+            path: 'general',
+            element: <General />,
+          },
+          {
+            path: 'management-fee',
+            element: <ManagementFee />,
+          },
+        ],
+      },
+      {
+        key: PERMISSIONS.ADMIN,
+        subscription: true,
+        path: 'business-information',
+        element: <BusinessInformation />,
+        handle: { crumb: () => <GetCrumbs data="Business Information" /> },
+      },
+      {
+        key: PERMISSIONS.ADMIN,
+        subscription: true,
+        path: 'users-and-roles',
+        element: <OutletSuspense />,
+        children: [
+          {
+            index: true,
+            element: <Users />,
+            handle: { crumb: () => <GetCrumbs data="Users" /> },
+          },
+          {
+            path: 'create',
+            element: <UserCreate />,
+          },
+          {
+            path: 'modify/:user',
+            element: <UserModify />,
+          },
+          {
+            path: 'details/:user',
+            element: <UserDetails />,
+          },
+          {
+            path: 'roles',
+            element: <OutletSuspense />,
+            children: [
+              {
+                index: true,
+                element: <Roles />,
+                handle: { crumb: () => <GetCrumbs data="Roles" /> },
+              },
+              {
+                path: 'create',
+                element: <RolesCreate />,
+              },
+              {
+                path: 'modify/:role',
+                element: <RolesModify />,
               },
             ],
           },

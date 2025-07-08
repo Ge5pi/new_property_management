@@ -7,8 +7,8 @@ import { useAuthState } from 'hooks/useAuthState';
 
 import { getUserAccountType } from 'utils/functions';
 
-import { admin } from './admin-routes';
-import { tenant } from './tenant-routes';
+import { adminRoutes, AdminLayoutWrapper, LoginPageGuard } from './admin-routes';
+import { tenantRoutes, TenantLayoutWrapper, TenantLoginPageGuard } from './tenant-routes';
 
 export declare type RouteWithPermissions = RouteIndex | RouteNonIndex;
 declare interface RouteIndex extends Omit<IndexRouteObject, 'children'> {
@@ -26,14 +26,59 @@ declare interface RouteNonIndex extends Omit<NonIndexRouteObject, 'children'> {
 export const RouterWrapper = () => {
   const { activeRoute } = useAuthState();
 
-  switch (activeRoute) {
-    case 'ADMIN':
-      return <RouterProvider router={createBrowserRouter(getRoutes(admin))} />;
-    case 'TENANT':
-      return <RouterProvider router={createBrowserRouter(tenant)} />;
-    default:
-      return <RouterProvider router={createBrowserRouter([...getRoutes(admin), ...tenant])} />;
-  }
+  const router = useMemo(() => {
+    const commonRoutes: RouteWithPermissions[] = [
+      {
+        path: '/',
+        element: <LoginPageGuard />,
+      },
+      {
+        path: 'admin/login',
+        element: <LoginPageGuard />,
+      },
+      {
+        path: 'tenant/login',
+        element: <TenantLoginPageGuard />,
+      },
+    ];
+
+    switch (activeRoute) {
+      case 'ADMIN':
+        return createBrowserRouter([
+          ...commonRoutes,
+          {
+            path: 'admin',
+            element: <AdminLayoutWrapper />,
+            children: adminRoutes,
+          },
+        ]);
+      case 'TENANT':
+        return createBrowserRouter([
+          ...commonRoutes,
+          {
+            path: 'tenant',
+            element: <TenantLayoutWrapper />,
+            children: tenantRoutes,
+          },
+        ]);
+      default:
+        return createBrowserRouter([
+          ...commonRoutes,
+          {
+            path: 'admin',
+            element: <AdminLayoutWrapper />,
+            children: adminRoutes,
+          },
+          {
+            path: 'tenant',
+            element: <TenantLayoutWrapper />,
+            children: tenantRoutes,
+          },
+        ]);
+    }
+  }, [activeRoute]);
+
+  return <RouterProvider router={router} />;
 };
 
 const getRoutes = (arr: RouteWithPermissions[]) => {
@@ -47,7 +92,7 @@ const getRoutes = (arr: RouteWithPermissions[]) => {
     }
 
     if (route.children) {
-      getRoutes(route.children);
+      route.children = getRoutes(route.children);
     }
 
     return route;

@@ -44,14 +44,17 @@ const AuthProvider = ({ children }: Props) => {
   const [authenticate] = useAuthenticateUserMutation();
 
   const activeRoute = useMemo(() => {
-    if (user && authenticated) {
-      const accountType = getUserAccountType(user);
+    const newActiveRoute = (() => {
+      if (user && authenticated) {
+        const accountType = getUserAccountType(user);
 
-      if (accountType === 'ADMIN' || accountType === 'SUPER_ADMIN') return 'ADMIN';
-      if (accountType === 'TENANT') return 'TENANT';
-    }
-
-    return 'LOG_OUT';
+        if (accountType === 'ADMIN' || accountType === 'SUPER_ADMIN') return 'ADMIN';
+        if (accountType === 'TENANT') return 'TENANT';
+      }
+      return 'LOG_OUT';
+    })();
+    console.log('activeRoute changed to:', newActiveRoute);
+    return newActiveRoute;
   }, [user, authenticated]);
 
   const handleLogin = useCallback((state?: boolean, token?: string, currentUser?: ICurrentUser) => {
@@ -94,16 +97,18 @@ const AuthProvider = ({ children }: Props) => {
 
   useLayoutEffect(() => {
     const access = localStorage.getItem('ppm-session');
-    const refresh = localStorage.getItem('ppm-session-ref');
-    if (access && refresh) {
+    if (access) {
+      const refresh = localStorage.getItem('ppm-session-ref');
       setLoading(true);
       authenticate({ access, refresh })
         .unwrap()
         .then(result => {
           let token = localStorage.getItem('ppm-session') as string;
-          if (result.access && result.refresh) {
+          if (result.access) {
             localStorage.setItem('ppm-session', result.access);
-            localStorage.setItem('ppm-session-ref', result.refresh);
+            if (result.refresh) {
+              localStorage.setItem('ppm-session-ref', result.refresh);
+            }
             token = result.access;
           }
 
@@ -144,7 +149,7 @@ const AuthProvider = ({ children }: Props) => {
         return sidebar
           .filter(route => {
             if (route.key) {
-              return route.key.split(',').some(g => user.group_names.includes(g));
+              return route.key.split(',').some(g => (user.group_names ?? []).includes(g));
             }
             return true;
           })
@@ -160,7 +165,7 @@ const AuthProvider = ({ children }: Props) => {
     (group: string) => {
       const is_superuser = user && getUserAccountType(user) === 'SUPER_ADMIN';
       if (user && !is_superuser && authenticated) {
-        return group.split(',').some(g => user.group_names.includes(g));
+        return group.split(',').some(g => (user.group_names ?? []).includes(g));
       }
       return true;
     },

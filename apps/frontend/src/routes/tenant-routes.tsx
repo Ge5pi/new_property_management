@@ -1,5 +1,7 @@
 import { lazy } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+
+import { useAuthState } from 'hooks/useAuthState';
 
 import { TenantLayout } from 'components/layouts/layout-container';
 import OutletSuspense from 'components/layouts/layout-container/outlet-suspense';
@@ -10,7 +12,6 @@ import RentalInvoiceDetails from 'pages/tenant/accounting/rental-invoice-details
 import GetCrumbs from './crumbs';
 import ErrorBoundary from './error-boundary';
 import { RouteWithPermissions } from './route-wrapper';
-import PrivateRoute, { ProtectedRoute } from './secured-routes';
 
 const Dashboard = lazy(() => import('pages/tenant/dashboard/dashboard'));
 
@@ -41,171 +42,139 @@ const ForgotPassword = lazy(() => import('pages/tenant/auth/forgot-password'));
 const ChangePassword = lazy(() => import('pages/tenant/auth/change-password'));
 const OTPConfirmation = lazy(() => import('pages/tenant/auth/otp-confirmation'));
 
-export const tenant: RouteWithPermissions[] = [
+export const TenantLayoutWrapper = () => {
+  const { authenticated } = useAuthState();
+  if (!authenticated) {
+    return <Navigate to="/tenant/login" replace />;
+  }
+  return <TenantLayout />;
+};
+
+export const TenantLoginPageGuard = () => {
+  const { authenticated } = useAuthState();
+  if (authenticated) {
+    return <Navigate to="/tenant/dashboard" replace />;
+  }
+  return <LoginTenant />;
+};
+
+export const tenantRoutes: RouteWithPermissions[] = [
   {
-    path: '/',
-    errorElement: <ErrorBoundary />,
+    path: 'dashboard',
+    element: <Dashboard />,
+    handle: { crumb: () => <GetCrumbs data="Dashboard" /> },
+  },
+  {
+    path: 'requests',
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Requests" /> },
     children: [
       {
         index: true,
-        element: <Navigate to="tenant" replace />,
+        element: <Requests />,
       },
       {
-        path: 'tenant',
-        element: <ProtectedRoute />,
+        path: 'create',
+        element: <RequestsCreate />,
+      },
+      {
+        path: 'details/:request',
+        element: <RequestsDetails />,
+      },
+      {
+        path: ':request/modify',
+        element: <RequestsModify />,
+      },
+      {
+        path: 'work-orders',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Work Orders" /> },
         children: [
           {
             index: true,
-            element: <LoginTenant />,
-          },
-          {
-            path: 'forgot-password',
-            element: <ForgotPassword />,
-          },
-          {
-            path: 'otp-confirmation',
-            element: <OTPConfirmation />,
-          },
-          {
-            path: 'change-password',
-            element: <ChangePassword />,
-          },
-        ],
-      },
-      {
-        path: 'tenant',
-        element: <PrivateRoute />,
-        children: [
-          {
-            element: <OutletSuspense />,
-            children: [
-              {
-                element: <TenantLayout />,
-                children: [
-                  {
-                    path: 'dashboard',
-                    element: <Dashboard />,
-                    handle: { crumb: () => <GetCrumbs data="Dashboard" /> },
-                  },
-                  {
-                    path: 'requests',
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Requests" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Requests />,
-                      },
-                      {
-                        path: 'create',
-                        element: <RequestsCreate />,
-                      },
-                      {
-                        path: 'details/:request',
-                        element: <RequestsDetails />,
-                      },
-                      {
-                        path: ':request/modify',
-                        element: <RequestsModify />,
-                      },
-                      {
-                        path: 'work-orders',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Work Orders" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <WorkOrders />,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    path: 'announcements',
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Announcements" /> },
-                    children: [
-                      {
-                        index: true,
-                        element: <Announcements />,
-                      },
-                      {
-                        path: 'details/:announcement',
-                        element: <AnnouncementDetails />,
-                      },
-                    ],
-                  },
-                  {
-                    path: 'documents',
-                    element: <Documents />,
-                    handle: { crumb: () => <GetCrumbs data="Documents" /> },
-                  },
-                  {
-                    path: 'accounting',
-                    element: <OutletSuspense />,
-                    handle: { crumb: () => <GetCrumbs data="Accounting" /> },
-                    children: [
-                      {
-                        index: true,
-                        handle: { crumb: () => <GetCrumbs data="Invoices" /> },
-                        element: <RentalInvoices />,
-                      },
-                      {
-                        path: ':invoice_id/details',
-                        element: <RentalInvoiceDetails />,
-                      },
-                      {
-                        path: 'charges',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Charges" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Charges />,
-                          },
-                          {
-                            path: ':charge/details',
-                            element: <ChargeDetails />,
-                          },
-                        ],
-                      },
-                      {
-                        path: 'payments',
-                        element: <OutletSuspense />,
-                        handle: { crumb: () => <GetCrumbs data="Payments" /> },
-                        children: [
-                          {
-                            index: true,
-                            element: <Payments />,
-                          },
-                          {
-                            path: 'details/:id',
-                            element: <PaymentsDetails />,
-                          },
-                          {
-                            path: 'create/:invoice_id',
-                            element: <CreatePayment />,
-                          },
-                          {
-                            path: 'modify/:invoice_id/:id',
-                            element: <ModifyPayment />,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    path: 'contact-us',
-                    element: <Contact />,
-                    handle: { crumb: () => <GetCrumbs data="Contact Us" /> },
-                  },
-                ],
-              },
-            ],
+            element: <WorkOrders />,
           },
         ],
       },
     ],
+  },
+  {
+    path: 'announcements',
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Announcements" /> },
+    children: [
+      {
+        index: true,
+        element: <Announcements />,
+      },
+      {
+        path: 'details/:announcement',
+        element: <AnnouncementDetails />,
+      },
+    ],
+  },
+  {
+    path: 'documents',
+    element: <Documents />,
+    handle: { crumb: () => <GetCrumbs data="Documents" /> },
+  },
+  {
+    path: 'accounting',
+    element: <OutletSuspense />,
+    handle: { crumb: () => <GetCrumbs data="Accounting" /> },
+    children: [
+      {
+        index: true,
+        handle: { crumb: () => <GetCrumbs data="Invoices" /> },
+        element: <RentalInvoices />,
+      },
+      {
+        path: ':invoice_id/details',
+        element: <RentalInvoiceDetails />,
+      },
+      {
+        path: 'charges',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Charges" /> },
+        children: [
+          {
+            index: true,
+            element: <Charges />,
+          },
+          {
+            path: ':charge/details',
+            element: <ChargeDetails />,
+          },
+        ],
+      },
+      {
+        path: 'payments',
+        element: <OutletSuspense />,
+        handle: { crumb: () => <GetCrumbs data="Payments" /> },
+        children: [
+          {
+            index: true,
+            element: <Payments />,
+          },
+          {
+            path: 'details/:id',
+            element: <PaymentsDetails />,
+          },
+          {
+            path: 'create/:invoice_id',
+            element: <CreatePayment />,
+          },
+          {
+            path: 'modify/:invoice_id/:id',
+            element: <ModifyPayment />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: 'contact-us',
+    element: <Contact />,
+    handle: { crumb: () => <GetCrumbs data="Contact Us" /> },
   },
 ];

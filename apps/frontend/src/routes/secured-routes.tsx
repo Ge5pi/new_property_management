@@ -32,9 +32,12 @@ export default PrivateRoute;
 
 export const ProtectedRoute = () => {
   const { activeRoute } = useAuthState();
+  const { pathname } = window.location;
   if (activeRoute === 'ADMIN' || activeRoute === 'TENANT') {
     const path = getPathBasedRole(activeRoute);
-    return <Navigate to={`${path}/dashboard`} replace />;
+    if (pathname.endsWith(path)) {
+      return <Navigate to={`${path}/dashboard`} replace />;
+    }
   }
 
   return <Outlet />;

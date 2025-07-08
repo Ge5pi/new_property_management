@@ -53,6 +53,7 @@ import purchaseOrderRouter from '../modules/purchase_order/purchase_order.router
 import purchaseOrderItemRouter from '../modules/purchase_order_item/purchase_order_item.router';
 import purchaseOrderAttachmentRouter from '../modules/purchase_order_attachment/purchase_order_attachment.router';
 import projectRouter from '../modules/project/project.router';
+import dashboardRouter from '../modules/dashboard/dashboard.router';
 
 const router = Router();
 
@@ -113,5 +114,6 @@ router.use('/purchase-orders', purchaseOrderRouter);
 router.use('/purchase-order-items', purchaseOrderItemRouter);
 router.use('/purchase-order-attachments', purchaseOrderAttachmentRouter);
 router.use('/projects', projectRouter);
+router.use('/dashboard', dashboardRouter);
 
 export default router;

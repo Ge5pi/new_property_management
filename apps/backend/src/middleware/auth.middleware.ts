@@ -1,40 +1,52 @@
+// apps/backend/src/middleware/auth.middleware.ts
+
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config'; // 1. Import from config
+import { JWT_SECRET } from '../config';
+import { db } from '../database/custom-prisma-client'; // Import the database client
 
+// Define a more complete user payload for the request
 interface AuthenticatedRequest extends Request {
-  userId?: string;
+  user?: any; // Using `any` for simplicity, you can create a specific type
 }
 
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  
-  // --- Start Debugging Logs ---
-  console.log('--- Authenticate Token Middleware ---');
-  console.log('Authorization Header:', authHeader);
-  console.log('Extracted Token:', token);
-  // --- End Debugging Logs ---
+// ✅ Note the function is now `async`
+export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) {
-    console.log('Middleware Result: No token provided. Sending 401.');
-    res.sendStatus(401); 
-    return;
-  }
-
-  // 2. Use the imported JWT_SECRET
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) {
-      // --- Start Debugging Logs ---
-      console.log('Middleware Result: JWT verification failed. Sending 403.');
-      console.error('JWT Error:', err.message);
-      // --- End Debugging Logs ---
-      res.sendStatus(403); 
+    if (token == null) {
+      res.sendStatus(401);
       return;
     }
+
+    // `jwt.verify` can be used with async/await if wrapped in a promise, but a callback is fine here.
+    // For consistency with the rest of the new async logic, let's proceed with a manual async verification.
     
-    console.log('Middleware Result: Token verified successfully. User:', user);
-    req.userId = user.userId;
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    
+    if (!decoded || !decoded.userId) {
+        res.sendStatus(403);
+        return;
+    }
+
+    // Fetch the full user from the database using the ID from the token
+    const user = await db.user.findUnique({
+      where: { id: decoded.userId },
+    });
+
+    if (!user) {
+      res.sendStatus(403); // User in token not found in DB
+      return;
+    }
+
+    // Attach the entire user object to the request
+    req.user = user;
     next();
-  });
+
+  } catch (err) {
+    // This will catch expired tokens, malformed tokens, etc.
+    res.sendStatus(403);
+  }
 };

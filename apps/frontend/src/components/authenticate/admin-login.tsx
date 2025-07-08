@@ -1,6 +1,5 @@
 import { Form } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
 
 import { Formik } from 'formik';
 import { authValidationSchema } from 'validations/base';
@@ -22,13 +21,7 @@ const AdminLogin = () => {
   const [searchParam] = useSearchParams();
   const navigate = useNavigate();
 
-  const [loginUser, { isLoading, isSuccess, error }] = useLoginUserMutation();
-
-  useEffect(() => {
-    if (isSuccess) {
-      navigate('/admin/dashboard');
-    }
-  }, [isSuccess, navigate]);
+  const [loginUser] = useLoginUserMutation();
 
   return (
     <div>
@@ -42,7 +35,7 @@ const AdminLogin = () => {
           loginUser({ ...values, loginFor: 'admin' })
             .unwrap()
             .then(response => {
-              if (response.access && response.refresh) {
+              if (response.access) {
                 handleLogin(true, response.access, response);
 
                 let path = `/admin/dashboard`;

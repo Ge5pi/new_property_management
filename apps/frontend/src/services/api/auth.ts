@@ -77,43 +77,46 @@ const authenticationAPIs = api.injectEndpoints({
      loginUser: build.mutation<IAuthenticatedUser, ILoginUser>({
       async queryFn(loginInfo, _queryApi, _extraOptions, fetchWithBQ) {
         const url =
-          loginInfo.loginFor === 'admin' ? `/api/authentication/admin-token/` : `/api/authentication/tenant-token/`;
-        const createToken = await fetchWithBQ({ url, method: 'post', data: loginInfo });
+          loginInfo.loginFor === 'admin'
+            ? `/api/authentication/admin-token/`
+            : `/api/authentication/tenant-token/`;
+        const createTokenResponse = await fetchWithBQ({ url, method: 'post', data: loginInfo });
 
-        if (createToken && createToken.error) {
-          return { error: createToken.error };
+        if (createTokenResponse && createTokenResponse.error) {
+          return { error: createTokenResponse.error };
         }
 
-        // --- START: THE FIX ---
+        let tokenPayload: Partial<ITokenObject> = {};
 
-        // 1. Cast the response data to the correct login response interface
-        const loginResponse = createToken.data as ILoginResponse;
-
-        // 2. Extract the actual token from the 'token' property
-        const accessToken = loginResponse.token;
-
-        if (!accessToken) {
-            // Handle cases where the login might succeed but the token is missing
-            return { error: { status: 401, data: { detail: 'Login succeeded, but token was not provided.'}}};
+        if (loginInfo.loginFor === 'admin') {
+          const tokenData = createTokenResponse.data as ITokenObject;
+          localStorage.setItem('ppm-session', tokenData.access);
+          localStorage.setItem('ppm-session-ref', tokenData.refresh);
+          tokenPayload = { access: tokenData.access, refresh: tokenData.refresh };
+        } else {
+          // tenant
+          const tokenData = createTokenResponse.data as ILoginResponse;
+          localStorage.setItem('ppm-session', tokenData.token);
+          // Tenant does not get a refresh token from this endpoint
+          localStorage.removeItem('ppm-session-ref');
+          tokenPayload = { access: tokenData.token };
         }
 
-        // 3. Save the correct token value to localStorage.
-        //    Your old code was saving `undefined` because it was looking for a 'refresh' token that doesn't exist in this response.
-        localStorage.setItem('ppm-session', accessToken);
-        // localStorage.setItem('ppm-session-ref', token.refresh); // This line is removed as 'refresh' is not part of the login response
-
-        // --- END: THE FIX ---
-
-        // Now that the correct token is saved, this next call will succeed.
-        const currentUser = await fetchWithBQ({
+        const currentUserResponse = await fetchWithBQ({
           url: '/api/authentication/current-user-details/',
           method: 'get',
         });
 
-        // The user data is available in the original login response, but fetching it again is fine.
-        return currentUser.data
-          ? { data: { ...currentUser.data } as IAuthenticatedUser } // We no longer need to merge token data here
-          : { error: currentUser.error };
+        if (currentUserResponse.error) {
+          return { error: currentUserResponse.error };
+        }
+
+        const result: IAuthenticatedUser = {
+          ...(currentUserResponse.data as ICurrentUser),
+          ...tokenPayload,
+        };
+
+        return { data: result };
       },
     }),
 
