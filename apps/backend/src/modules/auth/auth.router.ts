@@ -15,6 +15,15 @@ router.post(
   authController.adminToken
 );
 
+// --- Маршрут для обновления токена ---
+router.options('/token/refresh', corsMiddleware);
+router.post(
+  '/token/refresh',
+  corsMiddleware,
+  express.json(),
+  authController.tokenRefresh
+);
+
 // --- Маршрут для получения данных текущего пользователя ---
 
 // 1. Добавьте эту строку для обработки OPTIONS запроса

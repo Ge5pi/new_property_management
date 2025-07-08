@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sign, SignOptions } from 'jsonwebtoken';
+import { sign, verify, SignOptions } from 'jsonwebtoken';
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../../config';
 import { db } from '../../database/custom-prisma-client';
 import bcrypt from 'bcryptjs';
@@ -121,6 +121,45 @@ export async function currentUserDetails(req: AuthenticatedRequest, res: Respons
 
   } catch (error) {
     console.error('Error fetching current user details:', error);
+    res.status(500).json({ detail: 'Internal server error.' });
+  }
+}
+
+export async function tokenRefresh(req: Request, res: Response): Promise<void> {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      res.status(400).json({ detail: 'Refresh token is required.' });
+      return;
+    }
+
+verify(refreshToken, JWT_SECRET, async (err: any, decoded: any) => {
+      if (err) {
+        res.status(403).json({ detail: 'Invalid refresh token.' });
+        return;
+      }
+
+      const user = await db.user.findUnique({
+        where: { id: decoded.userId },
+      });
+
+      if (!user) {
+        res.status(404).json({ detail: 'User not found.' });
+        return;
+      }
+
+      const signOptions: SignOptions = { expiresIn: JWT_EXPIRES_IN };
+      const newAccessToken = sign(
+        { userId: user.id, email: user.email, isAdmin: user.isStaff },
+        JWT_SECRET,
+        signOptions
+      );
+
+      res.json({ access: newAccessToken });
+    });
+  } catch (error) {
+    console.error('Error refreshing token:', error);
     res.status(500).json({ detail: 'Internal server error.' });
   }
 }
