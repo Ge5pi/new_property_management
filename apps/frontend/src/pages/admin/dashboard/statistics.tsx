@@ -25,24 +25,24 @@ const returnStatisticsData = (data: IDashboardStatistics) => {
     {
       id: 'total-units',
       heading: 'Total Units',
-      value: data.total_units_count,
+      value: data.total_units_count ?? 0,
       icon: <BoxIcon />,
       items: [
         {
           id: 'no-of-vacant-units',
           heading: 'No. of vacant units',
-          value: data.vacant_units_count,
+          value: data.vacant_units_count ?? 0,
         },
         {
           id: 'no-of-occupied-units',
           heading: 'No. of occupied units',
-          value: data.occupied_units_count,
+          value: data.occupied_units_count ?? 0,
         },
         {
           id: 'occupancy',
           heading: 'Occupancy %',
           className: 'percentage-symbol me-3',
-          value: `${data.occupancy_percentage.toFixed(2)}`,
+          value: `${(data.occupancy_percentage ?? 0).toFixed(2)}`,
         },
       ],
     },

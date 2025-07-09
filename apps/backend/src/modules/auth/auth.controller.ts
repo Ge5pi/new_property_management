@@ -68,8 +68,7 @@ export async function adminToken(req: Request, res: Response): Promise<void> {
     }
 
     if (
-      (user.isStaff || user.isSubscriptionStaff) &&
-      user.associatedSubscriptionId !== null
+      (user.isStaff || user.isSubscriptionStaff)
     ) {
       const signOptions: SignOptions = { expiresIn: JWT_EXPIRES_IN };
       const token = sign(

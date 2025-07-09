@@ -755,6 +755,7 @@ export type User = {
     isStaff: Generated<boolean>;
     isSuperuser: Generated<boolean>;
     passwordHash: string;
+    associatedSubscriptionId: string | null;
     createdAt: Generated<Timestamp>;
     updatedAt: Timestamp;
 };
