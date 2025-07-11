@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { db } from '../src/database/custom-prisma-client';
+import { db  } from '../src/database/custom-prisma-client';
+import { GracePeriodType } from '@prisma/client';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -129,6 +130,7 @@ async function main() {
               where: { id },
               create: {
                 id,
+                associatedSubscriptionId: entry.fields.subscription?.toString() || null,
                 name: entry.fields.name,
                 address: entry.fields.address,
                 property_type_id: entry.fields.property_type.toString(),
@@ -172,6 +174,7 @@ async function main() {
                 rental_application_template_id: entry.fields.rental_application_template_id,
               },
               update: {
+                associatedSubscriptionId: entry.fields.subscription?.toString() || null,
                 name: entry.fields.name,
                 address: entry.fields.address,
                 property_type_id: entry.fields.property_type.toString(),
@@ -334,40 +337,117 @@ async function main() {
             console.log(`Upserted property upcoming activity with id ${id}`);
             break;
           case 'property.propertylatefeepolicy':
+            const oldGraceType = entry.fields.grace_period_type;
+            // Явно указываем тип переменной, чтобы избежать ошибки
+            let newGraceType: GracePeriodType | null = null; 
+            
+            if (oldGraceType === 'number_of_days') {
+                newGraceType = 'NUMBER_OF_DAY'; // Соответствует enum 'NUMBER_OF_DAY'
+            } else if (oldGraceType === 'till_date_of_month') {
+                newGraceType = 'TILL_DATE_OF_MONTH';
+            } else if (oldGraceType === 'no_grace_period') {
+                newGraceType = 'NO_GRACE_PERIOD';
+            }
+
             await db.propertyLateFeePolicy.upsert({
-              where: { id },
-              create: {
-                id,
-                start_date: entry.fields.start_date ? new Date(entry.fields.start_date) : undefined,
-                end_date: entry.fields.end_date ? new Date(entry.fields.end_date) : undefined,
-                late_fee_type: entry.fields.late_fee_type ? entry.fields.late_fee_type.toUpperCase() : null,
-                base_amount_fee: parseFloat(entry.fields.base_amount_fee),
-                eligible_charges: entry.fields.eligible_charges ? entry.fields.eligible_charges.toUpperCase() : null,
-                charge_daily_late_fees: entry.fields.charge_daily_late_fees,
-                daily_amount_per_month_max: parseFloat(entry.fields.daily_amount_per_month_max),
-                grace_period_type: entry.fields.grace_period_type ? entry.fields.grace_period_type.toUpperCase().replace(/_/g, '') : null,
-                grace_period: entry.fields.grace_period,
-                parent_property_id: entry.fields.parent_property?.toString(),
-                createdAt: entry.fields.createdAt ? new Date(entry.fields.createdAt) : undefined,
-                updatedAt: entry.fields.updatedAt ? new Date(entry.fields.updatedAt) : undefined,
-              },
-              update: {
-                start_date: entry.fields.start_date ? new Date(entry.fields.start_date) : undefined,
-                end_date: entry.fields.end_date ? new Date(entry.fields.end_date) : undefined,
-                late_fee_type: entry.fields.late_fee_type ? entry.fields.late_fee_type.toUpperCase() : null,
-                base_amount_fee: parseFloat(entry.fields.base_amount_fee),
-                eligible_charges: entry.fields.eligible_charges ? entry.fields.eligible_charges.toUpperCase() : null,
-                charge_daily_late_fees: entry.fields.charge_daily_late_fees,
-                daily_amount_per_month_max: parseFloat(entry.fields.daily_amount_per_month_max),
-                grace_period_type: entry.fields.grace_period_type ? entry.fields.grace_period_type.toUpperCase().replace(/_/g, '') : null,
-                grace_period: entry.fields.grace_period,
-                parent_property_id: entry.fields.parent_property?.toString(),
-                createdAt: entry.fields.createdAt ? new Date(entry.fields.createdAt) : undefined,
-                updatedAt: entry.fields.updatedAt ? new Date(entry.fields.updatedAt) : undefined,
-              },
+                where: { id },
+                create: {
+                    id,
+                    start_date: entry.fields.start_date ? new Date(entry.fields.start_date) : undefined,
+                    end_date: entry.fields.end_date ? new Date(entry.fields.end_date) : undefined,
+                    late_fee_type: entry.fields.late_fee_type ? entry.fields.late_fee_type.toUpperCase() : null,
+                    base_amount_fee: entry.fields.base_amount_fee ? parseFloat(entry.fields.base_amount_fee) : null,
+                    eligible_charges: entry.fields.eligible_charges ? entry.fields.eligible_charges.toUpperCase() : null,
+                    charge_daily_late_fees: entry.fields.charge_daily_late_fees,
+                    daily_amount_per_month_max: entry.fields.daily_amount_per_month_max ? parseFloat(entry.fields.daily_amount_per_month_max) : null,
+                    grace_period_type: newGraceType, // Используем исправленное значение
+                    grace_period: entry.fields.grace_period,
+                    parent_property_id: entry.fields.parent_property?.toString(),
+                    createdAt: entry.fields.createdAt ? new Date(entry.fields.createdAt) : undefined,
+                    updatedAt: entry.fields.updatedAt ? new Date(entry.fields.updatedAt) : undefined,
+                },
+                update: {
+                    // ... те же поля, что и в create
+                    start_date: entry.fields.start_date ? new Date(entry.fields.start_date) : undefined,
+                    end_date: entry.fields.end_date ? new Date(entry.fields.end_date) : undefined,
+                    late_fee_type: entry.fields.late_fee_type ? entry.fields.late_fee_type.toUpperCase() : null,
+                    base_amount_fee: entry.fields.base_amount_fee ? parseFloat(entry.fields.base_amount_fee) : null,
+                    eligible_charges: entry.fields.eligible_charges ? entry.fields.eligible_charges.toUpperCase() : null,
+                    charge_daily_late_fees: entry.fields.charge_daily_late_fees,
+                    daily_amount_per_month_max: entry.fields.daily_amount_per_month_max ? parseFloat(entry.fields.daily_amount_per_month_max) : null,
+                    grace_period_type: newGraceType,
+                    grace_period: entry.fields.grace_period,
+                    parent_property_id: entry.fields.parent_property?.toString(),
+                    createdAt: entry.fields.createdAt ? new Date(entry.fields.createdAt) : undefined,
+                    updatedAt: entry.fields.updatedAt ? new Date(entry.fields.updatedAt) : undefined,
+                },
             });
             console.log(`Upserted property late fee policy with id ${id}`);
             break;
+
+            case 'people.vendortype':
+              await db.vendorType.upsert({
+                where: { id },
+                create: {
+                  id,
+                  name: entry.fields.name,
+                  description: entry.fields.description,
+                  // Убедитесь, что у вас есть поле subscriptionId в модели VendorType, если оно нужно
+                  // associatedSubscriptionId: entry.fields.subscription?.toString() || null,   
+                },
+                update: {
+                  name: entry.fields.name,
+                  description: entry.fields.description,
+                },
+              });
+              console.log(`Upserted vendor type with id ${id}`);
+              break;
+
+            case 'people.vendor':
+              await db.vendor.upsert({
+                where: { id },
+                create: {
+                  id,
+                  associatedSubscriptionId: entry.fields.subscription?.toString() || null,
+                  first_name: entry.fields.first_name,
+                  last_name: entry.fields.last_name,
+                  company_name: entry.fields.company_name,
+                  use_company_name_as_display_name: entry.fields.use_company_name_as_display_name,
+                  vendor_type_id: entry.fields.vendor_type?.toString(),
+                  gl_account: entry.fields.gl_account,
+                  personal_contact_numbers: entry.fields.personal_contact_numbers ? JSON.parse(entry.fields.personal_contact_numbers) : [],
+                  business_contact_numbers: entry.fields.business_contact_numbers ? JSON.parse(entry.fields.business_contact_numbers) : [],
+                  personal_emails: entry.fields.personal_emails ? JSON.parse(entry.fields.personal_emails) : [],
+                  business_emails: entry.fields.business_emails ? JSON.parse(entry.fields.business_emails) : [],
+                  website: entry.fields.website,
+                  insurance_provide_name: entry.fields.insurance_provide_name,
+                  insurance_policy_number: entry.fields.insurance_policy_number,
+                  insurance_expiry_date: entry.fields.insurance_expiry_date ? new Date(entry.fields.insurance_expiry_date) : new Date(),
+                  tax_identity_type: entry.fields.tax_identity_type,
+                  tax_payer_id: entry.fields.tax_payer_id,
+                },
+                update: {}, // Оставляем пустым для простоты, upsert создаст если нужно
+              });
+              console.log(`Upserted vendor with id ${id}`);
+              break;
+
+            case 'people.tenant':
+              await db.tenant.upsert({
+                  where: { id },
+                  create: {
+                      id,
+                      associatedSubscriptionId: entry.fields.subscription?.toString() || null,
+                      first_name: entry.fields.first_name,
+                      last_name: entry.fields.last_name,
+                      email: entry.fields.email,
+                      phone_number: entry.fields.phone_number,
+                      lease_id: entry.fields.lease?.toString(),
+                      user_id: entry.fields.user && entry.fields.user[0] ? entry.fields.user[0].toString() : 'default_user_id', // Укажите запасной user_id, если нужно
+                  },
+                  update: {},
+              });
+              console.log(`Upserted tenant with id ${id}`);
+              break;
 
           default:
             console.log(`Skipping model ${entry.model}`);

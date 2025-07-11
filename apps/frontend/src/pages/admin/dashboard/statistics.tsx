@@ -18,77 +18,98 @@ import { useAuthState } from 'hooks/useAuthState';
 import { PERMISSIONS } from 'constants/permissions';
 import { calculatePercentage, displayDate, parseTime } from 'utils/functions';
 
-import { IDashboardStatistics } from 'interfaces/IDashboard';
+// ИНТЕРФЕЙС ТЕПЕРЬ СООТВЕТСТВУЕТ ДАННЫМ С БЭКЕНДА
+interface IDashboardStatistics {
+    units: {
+        total: number;
+        occupied: number;
+        vacant: number;
+        occupancy_percentage: string;
+    };
+    people: {
+        owners: number;
+        tenants: number;
+        vendors: number;
+        users: number;
+    };
+    properties: {
+        total: number;
+        complete_occupied: number;
+        partial_occupied: number;
+        vacant: number;
+    };
+}
 
+// ФУНКЦИЯ ОБНОВЛЕНА ДЛЯ РАБОТЫ С НОВОЙ СТРУКТУРОЙ ДАННЫХ
 const returnStatisticsData = (data: IDashboardStatistics) => {
   return [
     {
       id: 'total-units',
       heading: 'Total Units',
-      value: data.totalUnitsCount ?? 0,
+      value: data.units.total ?? 0,
       icon: <BoxIcon />,
       items: [
         {
           id: 'no-of-vacant-units',
           heading: 'No. of vacant units',
-          value: data.vacantUnitsCount ?? 0,
+          value: data.units.vacant ?? 0,
         },
         {
           id: 'no-of-occupied-units',
           heading: 'No. of occupied units',
-          value: data.occupiedUnitsCount ?? 0,
+          value: data.units.occupied ?? 0,
         },
         {
           id: 'occupancy',
           heading: 'Occupancy %',
           className: 'percentage-symbol me-3',
-          value: `${(data.occupancyPercentage ?? 0).toFixed(2)}`,
+          value: data.units.occupancy_percentage ?? '0.00',
         },
       ],
     },
     {
       id: 'total-vendors',
       heading: 'Total Vendors',
-      value: data.vendorsCount ?? 0,
+      value: data.people.vendors ?? 0,
       icon: <PeoplesIcon width={45} height={49.5} />,
       items: [
         {
           id: 'tenants',
           heading: 'Tenants',
-          value: data.tenantsCount,
+          value: data.people.tenants,
         },
         {
           id: 'owners',
           heading: 'Owners',
-          value: data.ownersCount,
+          value: data.people.owners,
         },
         {
           id: 'users',
           heading: 'Users',
-          value: data.usersCount,
+          value: data.people.users,
         },
       ],
     },
     {
       id: 'total-properties',
       heading: 'Total Properties',
-      value: data.propertiesCount ?? 0,
+      value: data.properties.total ?? 0,
       icon: <PropertiesIcon width={42} height={45.6} />,
       items: [
         {
           id: 'completed-occupied',
           heading: 'Complete occupied',
-          value: data.completeOccupiedPropertiesCount,
+          value: data.properties.complete_occupied,
         },
         {
           id: 'partial-occupied',
           heading: 'Partial occupied',
-          value: data.partialOccupiedPropertiesCount,
+          value: data.properties.partial_occupied,
         },
         {
           id: 'vacant-properties',
           heading: 'Vacant',
-          value: data.vacantPropertiesCount,
+          value: data.properties.vacant,
         },
       ],
     },
@@ -96,6 +117,7 @@ const returnStatisticsData = (data: IDashboardStatistics) => {
 };
 
 declare type UpcomingActivityTypes = 'properties' | 'units' | 'tenants' | 'owners' | '';
+
 function Statistics() {
   const { isAccessible } = useAuthState();
   const dashboardStatistics = useGetDashboardStatisticsQuery();

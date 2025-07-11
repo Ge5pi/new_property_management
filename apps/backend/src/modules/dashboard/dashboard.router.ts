@@ -1,24 +1,15 @@
 import { Router } from 'express';
-import corsMiddleware from '../../middleware/cors.middleware'; 
-import { getDashboardStats } from './dashboard.controller';
+import corsMiddleware from '../../middleware/cors.middleware';
 import { authenticateToken } from '../../middleware/auth.middleware';
+import { getDashboardStats } from './dashboard.controller';
 
 const router = Router();
-
-import { getGeneralStats } from './dashboard.controller';
 
 router.get(
   '/dashboard-stats',
   corsMiddleware,
   authenticateToken,
-  getDashboardStats 
-);
-
-router.get(
-  '/general-stats',
-  corsMiddleware,
-  authenticateToken,
-  getGeneralStats
+  getDashboardStats
 );
 
 export default router;

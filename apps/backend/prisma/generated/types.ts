@@ -302,6 +302,7 @@ export type ProjectToUnit = {
 };
 export type Property = {
     id: string;
+    associatedSubscriptionId: string | null;
     name: string;
     address: string;
     property_type_id: string;
@@ -646,6 +647,7 @@ export type ServiceRequestAttachment = {
 };
 export type Tenant = {
     id: string;
+    associatedSubscriptionId: string | null;
     first_name: string;
     last_name: string;
     email: string;
@@ -769,6 +771,7 @@ export type UserRoles = {
 };
 export type Vendor = {
     id: string;
+    associatedSubscriptionId: string | null;
     first_name: string;
     last_name: string;
     company_name: string;
