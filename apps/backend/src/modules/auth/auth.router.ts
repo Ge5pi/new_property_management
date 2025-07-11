@@ -4,6 +4,9 @@ import corsMiddleware from '../../middleware/cors.middleware';
 import * as authController from './auth.controller';
 import { authenticateToken } from '../../middleware/auth.middleware';
 
+import userRouter from '../user/user.router';
+import groupRouter from '../group/group.router';
+
 const router = Router();
 
 // --- Маршрут для получения токена ---
@@ -37,5 +40,8 @@ router.get(
   authController.currentUserDetails
 );
 
+// Add user and group routers
+router.use('/users', userRouter);
+router.use('/groups', groupRouter);
 
 export default router;

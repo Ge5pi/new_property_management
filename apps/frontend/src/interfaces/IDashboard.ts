@@ -9,18 +9,18 @@ export interface ILineChartProps {
 }
 
 export interface IDashboardStatistics {
-  total_units_count: number;
-  occupied_units_count: number;
-  vacant_units_count: number;
-  occupancy_percentage: number;
-  vendors_count: number;
-  tenants_count: number;
-  owners_count: number;
-  users_count: number;
-  properties_count: number;
-  complete_occupied_properties_count: number;
-  partial_occupied_properties_count: number;
-  vacant_properties_count: number;
+  totalUnitsCount: number;
+  vacantUnitsCount: number;
+  occupiedUnitsCount: number;
+  occupancyPercentage: number;
+  vendorsCount: number;
+  tenantsCount: number;
+  ownersCount: number;
+  usersCount: number;
+  propertiesCount: number;
+  completeOccupiedPropertiesCount: number;
+  partialOccupiedPropertiesCount: number;
+  vacantPropertiesCount: number;
 }
 
 export interface IDashboardGeneralStatistics {

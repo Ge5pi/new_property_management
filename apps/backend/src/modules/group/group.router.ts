@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import * as userController from './user.controller';
+import * as groupController from './group.controller';
 import { authenticateToken } from '../../middleware/auth.middleware';
 
 const router = Router();
@@ -12,10 +12,10 @@ function asyncHandler(fn: (req: Request, res: Response, next: NextFunction) => P
 
 router.use(authenticateToken);
 
-router.get('/', asyncHandler(userController.getAllUsers));
-router.get('/:id', asyncHandler(userController.getUserById));
-router.post('/', asyncHandler(userController.createUser));
-router.put('/:id', asyncHandler(userController.updateUser));
-router.delete('/:id', asyncHandler(userController.deleteUser));
+router.get('/', asyncHandler(groupController.getAllGroups));
+router.get('/:id', asyncHandler(groupController.getGroupById));
+router.post('/', asyncHandler(groupController.createGroup));
+router.put('/:id', asyncHandler(groupController.updateGroup));
+router.delete('/:id', asyncHandler(groupController.deleteGroup));
 
 export default router;

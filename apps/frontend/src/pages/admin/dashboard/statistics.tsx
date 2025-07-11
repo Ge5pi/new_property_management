@@ -25,70 +25,70 @@ const returnStatisticsData = (data: IDashboardStatistics) => {
     {
       id: 'total-units',
       heading: 'Total Units',
-      value: data.total_units_count ?? 0,
+      value: data.totalUnitsCount ?? 0,
       icon: <BoxIcon />,
       items: [
         {
           id: 'no-of-vacant-units',
           heading: 'No. of vacant units',
-          value: data.vacant_units_count ?? 0,
+          value: data.vacantUnitsCount ?? 0,
         },
         {
           id: 'no-of-occupied-units',
           heading: 'No. of occupied units',
-          value: data.occupied_units_count ?? 0,
+          value: data.occupiedUnitsCount ?? 0,
         },
         {
           id: 'occupancy',
           heading: 'Occupancy %',
           className: 'percentage-symbol me-3',
-          value: `${(data.occupancy_percentage ?? 0).toFixed(2)}`,
+          value: `${(data.occupancyPercentage ?? 0).toFixed(2)}`,
         },
       ],
     },
     {
       id: 'total-vendors',
       heading: 'Total Vendors',
-      value: data.vendors_count,
+      value: data.vendorsCount ?? 0,
       icon: <PeoplesIcon width={45} height={49.5} />,
       items: [
         {
           id: 'tenants',
           heading: 'Tenants',
-          value: data.tenants_count,
+          value: data.tenantsCount,
         },
         {
           id: 'owners',
           heading: 'Owners',
-          value: data.owners_count,
+          value: data.ownersCount,
         },
         {
           id: 'users',
           heading: 'Users',
-          value: data.users_count,
+          value: data.usersCount,
         },
       ],
     },
     {
       id: 'total-properties',
       heading: 'Total Properties',
-      value: data.properties_count,
+      value: data.propertiesCount ?? 0,
       icon: <PropertiesIcon width={42} height={45.6} />,
       items: [
         {
           id: 'completed-occupied',
           heading: 'Complete occupied',
-          value: data.complete_occupied_properties_count,
+          value: data.completeOccupiedPropertiesCount,
         },
         {
           id: 'partial-occupied',
           heading: 'Partial occupied',
-          value: data.partial_occupied_properties_count,
+          value: data.partialOccupiedPropertiesCount,
         },
         {
           id: 'vacant-properties',
           heading: 'Vacant',
-          value: data.vacant_properties_count,
+          value: data.vacantPropertiesCount,
         },
       ],
     },

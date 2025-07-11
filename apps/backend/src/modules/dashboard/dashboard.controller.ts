@@ -1,104 +1,246 @@
-// apps/backend/src/modules/dashboard/dashboard.controller.ts
-
 import { Request, Response } from 'express';
 import { db } from '../../database/custom-prisma-client';
 
+
 interface AuthenticatedRequest extends Request {
-  user?: {
-    associatedSubscriptionId?: string;
-  };
+  user?: { id?: string };
 }
 
 export async function getDashboardStats(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
-    const user = req.user;
-    if (!user || !user.associatedSubscriptionId) {
-      res.status(403).json({ detail: 'Access denied.' });
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    // Fetch user's associated subscription
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { associatedSubscriptionId: true },
+    });
+
+    if (!user?.associatedSubscriptionId) {
+      res.status(400).json({ message: 'User subscription not found' });
       return;
     }
 
     const subscriptionId = user.associatedSubscriptionId;
 
-    // --- Units Section (Corrected Multi-step Query) ---
-
-    // 1. Get the IDs of all owners for the current subscription
-    const ownersInSubscription = await db.owner.findMany({
-      select: { id: true },
-    });
-    const ownerIds = ownersInSubscription.map((o:any) => o.id);
-
-    // 2. Get the IDs of all properties linked to those owners
-    const propertiesForOwners = await db.property.findMany({
-        where: {
-            owners: { // Look at the PropertyOwner join table
-                some: {
-                    owner_id: { in: ownerIds } // Find records where the owner_id is in our list
-                }
-            }
-        },
-        select: { id: true }
-    });
-    const propertyIds = propertiesForOwners.map((p:any) => p.id);
-
-
-    // 3. Use the final list of property IDs to count the units
+    // Units Section
     const totalUnitsCount = await db.unit.count({
-      where: { parent_property_id: { in: propertyIds } },
+      where: { subscriptionId },
     });
-    const occupiedUnitsCount = await db.unit.count({
-      where: {
-        // isOccupied field does not exist, so remove this filter or replace with correct field if any
-        parent_property_id: { in: propertyIds },
-      },
-    });
-    const vacantUnitsCount = await db.unit.count({
-      where: {
-        // isOccupied field does not exist, so remove this filter or replace with correct field if any
-        parent_property_id: { in: propertyIds },
-      },
-    });
-    const occupancyPercentage = totalUnitsCount ? (occupiedUnitsCount / totalUnitsCount) * 100 : 0;
 
-    // --- End of Corrected Section ---
+    const occupiedUnitsCount = await db.unit.count({
+      where: { subscriptionId, isOccupied: true },
+    });
+
+    const vacantUnitsCount = await db.unit.count({
+      where: { subscriptionId, isOccupied: false },
+    });
+
+    const occupancyPercentage = totalUnitsCount ? (occupiedUnitsCount / totalUnitsCount) * 100 : 0;
 
     // People Section
     const vendorsCount = await db.vendor.count({
-      // subscriptionId field does not exist on vendor, remove filter or adjust accordingly
+      where: { subscriptionId },
     });
+
     const tenantsCount = await db.tenant.count({
-      // subscriptionId field does not exist on tenant, remove filter or adjust accordingly
+      where: { subscriptionId },
     });
-    const ownersCount = ownerIds.length; // We already have this count
+
+    const ownersCount = await db.owner.count({
+      where: { subscriptionId },
+    });
+
     const usersCount = await db.user.count({
       where: { associatedSubscriptionId: subscriptionId },
     });
 
     // Property Section
-    const propertiesCount = propertyIds.length; // We also have this count
+    const propertiesCount = await db.property.count({
+      where: { subscriptionId },
+    });
 
-    // Placeholders
-    const completeOccupiedPropertiesCount = 0;
-    const partialOccupiedPropertiesCount = 0;
-    const vacantPropertiesCount = 0;
+    // Count occupied units per property
+    const properties = await db.property.findMany({
+      where: { subscriptionId },
+      include: {
+        units: true,
+      },
+    });
+
+    let completeOccupiedPropertiesCount = 0;
+    let partialOccupiedPropertiesCount = 0;
+    let vacantPropertiesCount = 0;
+
+    for (const property of properties) {
+      const totalUnits = property.units.length;
+      const occupiedUnits = property.units.filter((unit: any) => unit.isOccupied).length;
+
+      if (occupiedUnits === totalUnits && totalUnits > 0) {
+        completeOccupiedPropertiesCount++;
+      } else if (occupiedUnits > 0 && occupiedUnits < totalUnits) {
+        partialOccupiedPropertiesCount++;
+      } else if (occupiedUnits === 0) {
+        vacantPropertiesCount++;
+      }
+    }
 
     const statsData = {
-      totalUnitsCount,
-      occupiedUnitsCount,
-      vacantUnitsCount,
-      occupancyPercentage,
-      vendorsCount,
-      tenantsCount,
-      ownersCount,
-      usersCount,
-      propertiesCount,
-      completeOccupiedPropertiesCount,
-      partialOccupiedPropertiesCount,
-      vacantPropertiesCount,
+      total_units_count: totalUnitsCount,
+      occupied_units_count: occupiedUnitsCount,
+      vacant_units_count: vacantUnitsCount,
+      occupancy_percentage: occupancyPercentage,
+      vendors_count: vendorsCount,
+      tenants_count: tenantsCount,
+      owners_count: ownersCount,
+      users_count: usersCount,
+      properties_count: propertiesCount,
+      complete_occupied_properties_count: completeOccupiedPropertiesCount,
+      partial_occupied_properties_count: partialOccupiedPropertiesCount,
+      vacant_properties_count: vacantPropertiesCount,
     };
 
     res.json(statsData);
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
-    res.status(500).json({ detail: 'Internal server error.' });
+    console.error('Error in getDashboardStats:', error);
+    res.status(500).json({ message: 'Failed to get dashboard stats' });
+  }
+}
+
+interface AuthenticatedRequest extends Request {
+  user?: { id?: string };
+}
+
+export async function getGeneralStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    // Fetch user's associated subscription
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { associatedSubscriptionId: true },
+    });
+
+    if (!user?.associatedSubscriptionId) {
+      res.status(400).json({ message: 'User subscription not found' });
+      return;
+    }
+
+    const subscriptionId = user.associatedSubscriptionId;
+
+    // Service Requests
+    const completedServiceRequestsCount = await db.serviceRequest.count({
+      where: {
+        subscriptionId,
+        workOrders: {
+          some: { status: 'COMPLETED' },
+        },
+      },
+      distinct: ['id'],
+    });
+
+    const pendingServiceRequestsCount = await db.serviceRequest.count({
+      where: {
+        subscriptionId,
+        NOT: {
+          workOrders: {
+            some: { status: 'COMPLETED' },
+          },
+        },
+      },
+      distinct: ['id'],
+    });
+
+    // Work Orders
+    const unassignedWorkOrdersCount = await db.workOrder.count({
+      where: {
+        subscriptionId,
+        status: 'UNASSIGNED',
+      },
+    });
+
+    const openWorkOrdersCount = await db.workOrder.count({
+      where: {
+        subscriptionId,
+        status: 'OPEN',
+      },
+    });
+
+    const assignedWorkOrdersCount = await db.workOrder.count({
+      where: {
+        subscriptionId,
+        status: 'ASSIGNED',
+      },
+    });
+
+    const completedWorkOrdersCount = await db.workOrder.count({
+      where: {
+        subscriptionId,
+        status: 'COMPLETED',
+      },
+    });
+
+    // Rental Applications
+    const approvedRentalApplicationsCount = await db.rentalApplication.count({
+      where: {
+        subscriptionId,
+        status: 'APPROVED',
+      },
+    });
+
+    const pendingRentalApplicationsCount = await db.rentalApplication.count({
+      where: {
+        subscriptionId,
+        status: 'PENDING',
+      },
+    });
+
+    const rejectedRentalApplicationsCount = await db.rentalApplication.count({
+      where: {
+        subscriptionId,
+        status: 'REJECTED',
+      },
+    });
+
+    const onHoldRentalApplicationsCount = await db.rentalApplication.count({
+      where: {
+        subscriptionId,
+        status: 'ON_HOLD_OR_WAITING',
+      },
+    });
+
+    const draftRentalApplicationsCount = await db.rentalApplication.count({
+      where: {
+        subscriptionId,
+        status: 'DRAFT',
+      },
+    });
+
+    const generalStatsData = {
+      completed_service_requests_count: completedServiceRequestsCount,
+      pending_service_requests_count: pendingServiceRequestsCount,
+      unassigned_work_orders_count: unassignedWorkOrdersCount,
+      open_work_orders_count: openWorkOrdersCount,
+      assigned_work_orders_count: assignedWorkOrdersCount,
+      completed_work_orders_count: completedWorkOrdersCount,
+      approved_rental_applications_count: approvedRentalApplicationsCount,
+      pending_rental_applications_count: pendingRentalApplicationsCount,
+      rejected_rental_applications_count: rejectedRentalApplicationsCount,
+      on_hold_rental_applications_count: onHoldRentalApplicationsCount,
+      draft_rental_applications_count: draftRentalApplicationsCount,
+    };
+
+    res.json(generalStatsData);
+  } catch (error) {
+    console.error('Error in getGeneralStats:', error);
+    res.status(500).json({ message: 'Failed to get general stats' });
   }
 }
